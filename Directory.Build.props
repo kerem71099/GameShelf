@@ -10,7 +10,11 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <NoWarn>$(NoWarn);CA1848;CA2007;CA1031</NoWarn>
+    <!-- CA1051: ViewModelBase'te protected alan (Logger/Dispatcher) kasıtlı
+         CA1716: IEmulatorBackendFactory.Get / ILoggingService.Error adları okunabilirlik için seçildi
+         CA1001: CancellationTokenSource alanları ViewModel yaşam döngüsünde kasıtlı
+         CA1822: LegalNote gibi üyeler XAML binding için örnek üye kalmalı -->
+    <NoWarn>$(NoWarn);CA1848;CA2007;CA1031;CA1051;CA1716;CA1001;CA1822</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="Assembly metadata">

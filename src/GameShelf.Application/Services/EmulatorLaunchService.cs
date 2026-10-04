@@ -66,8 +66,8 @@ public sealed class EmulatorLaunchService : IEmulatorLaunchService
 
         if (built is null)
         {
-            var validation = await ValidateAsync(game, cancellationToken).ConfigureAwait(false);
-            return LaunchOutcome.Fail(validation.Summary, validation.Issues.ToArray());
+            var failed = await ValidateAsync(game, cancellationToken).ConfigureAwait(false);
+            return LaunchOutcome.Fail(failed.Summary, failed.Issues.ToArray());
         }
 
         var (context, backend) = built.Value;

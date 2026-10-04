@@ -15,8 +15,17 @@ echo.                                   >> "%LOG%"
 echo ===== RESTORE =====                >> "%LOG%"
 dotnet restore GameShelf.sln            >> "%LOG%" 2>&1
 echo.                                   >> "%LOG%"
-echo ===== BUILD =====                  >> "%LOG%"
-dotnet build GameShelf.sln -c Debug --no-restore -v minimal >> "%LOG%" 2>&1
+
+rem Her projeyi ayri ayri derle: bir proje patlarsa digerleri de denensin
+rem (boylece tum hatalar TEK dosyada gorunur)
+for %%p in (GameShelf.Domain GameShelf.Application GameShelf.Infrastructure) do (
+    echo ===== BUILD src\%%p =====       >> "%LOG%"
+    dotnet build src\%%p\%%p.csproj -c Debug --no-restore -v minimal >> "%LOG%" 2>&1
+)
+echo ===== BUILD src\GameShelf.App =====  >> "%LOG%"
+dotnet build src\GameShelf.App\GameShelf.App.csproj -c Debug --no-restore -v minimal >> "%LOG%" 2>&1
+echo ===== BUILD tests =====              >> "%LOG%"
+dotnet build tests\GameShelf.Tests\GameShelf.Tests.csproj -c Debug --no-restore -v minimal >> "%LOG%" 2>&1
 
 echo Bitti: %LOG%
 echo.

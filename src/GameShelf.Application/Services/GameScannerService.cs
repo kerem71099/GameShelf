@@ -58,7 +58,8 @@ public sealed class GameScannerService : IGameScannerService
                 continue;
             }
 
-            CollectCandidates(folder, extensions, candidates, ownerByCandidate, result, cancellationToken);
+            await CollectCandidatesAsync(folder, extensions, candidates, ownerByCandidate, result, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         var processed = 0;
@@ -103,7 +104,7 @@ public sealed class GameScannerService : IGameScannerService
 
     // ------------------------------------------------------------------ tarama
 
-    private void CollectCandidates(
+    private async Task CollectCandidatesAsync(
         LibraryFolder folder,
         HashSet<string> extensions,
         List<string> candidates,
