@@ -6,7 +6,7 @@
              xmlns:entities="clr-namespace:GameShelf.Domain.Entities;assembly=GameShelf.Domain">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="{StaticResource Space.XL}" MaxWidth="920" HorizontalAlignment="Left">
+        <Grid Margin="{StaticResource Thickness.XL}" MaxWidth="920" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />

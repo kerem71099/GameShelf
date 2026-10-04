@@ -24,6 +24,9 @@
     <!-- Kenarlık kalınlıkları (gölge yerine hairline) -->
     <Thickness x:Key="Thickness.Hairline">1</Thickness>
     <Thickness x:Key="Thickness.Focus">2</Thickness>
+    <!-- Margin/Padding icin Thickness gerekir (Double degil!) -->
+    <Thickness x:Key="Thickness.S">8</Thickness>
+    <Thickness x:Key="Thickness.XL">24</Thickness>
 
     <!-- Tipografi -->
     <FontFamily x:Key="Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
@@ -42,6 +45,7 @@
     <sys:Double x:Key="CardWidth">168</sys:Double>
     <sys:Double x:Key="CardCoverHeight">224</sys:Double>
     <sys:Double x:Key="RowHeight">44</sys:Double>
-    <sys:Double x:Key="RailWidth">220</sys:Double>
+    <!-- ColumnDefinition.Width / RowDefinition.Height icin GridLength gerekir (Double degil!) -->
+    <GridLength x:Key="RailWidth">220</GridLength>
 
 </ResourceDictionary>

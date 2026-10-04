@@ -12,7 +12,7 @@
 
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="{StaticResource Space.XL}" MaxWidth="920" HorizontalAlignment="Left">
+        <Grid Margin="{StaticResource Thickness.XL}" MaxWidth="920" HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />

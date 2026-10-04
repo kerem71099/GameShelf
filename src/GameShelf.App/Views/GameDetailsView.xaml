@@ -20,7 +20,7 @@
     </UserControl.InputBindings>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="{StaticResource Space.XL}">
+        <Grid Margin="{StaticResource Thickness.XL}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
