@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- FolderBrowserDialog (System.Windows.Forms) için gerekiyor -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>GameShelf.App</RootNamespace>
+    <AssemblyName>GameShelf</AssemblyName>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <!-- SQLite native (e_sqlite3.dll) tek dosyadan açılabilsin -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameShelf.Application\GameShelf.Application.csproj" />
+    <ProjectReference Include="..\GameShelf.Infrastructure\GameShelf.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Themes\Tokens.xaml"><Generator>MSBuild:Compile</Generator></Page>
+    <Page Update="Themes\Theme.Dark.xaml"><Generator>MSBuild:Compile</Generator></Page>
+    <Page Update="Themes\Theme.Light.xaml"><Generator>MSBuild:Compile</Generator></Page>
+    <Page Update="Themes\Styles.xaml"><Generator>MSBuild:Compile</Generator></Page>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Shelf · Light (kâğıt) — sıcak kâğıt zemini + koyulaştırılmış Ember -->
+
+    <!-- Yüzeyler -->
+    <SolidColorBrush x:Key="Brush.WindowBackground" Color="#F4F1EC" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="#FBF9F6" />
+    <SolidColorBrush x:Key="Brush.SurfaceRaised" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Brush.SurfaceSunken" Color="#EAE6DF" />
+
+    <!-- Kenarlıklar -->
+    <SolidColorBrush x:Key="Brush.Border" Color="#DFD9D0" />
+    <SolidColorBrush x:Key="Brush.BorderStrong" Color="#C7BFB4" />
+
+    <!-- Metin -->
+    <SolidColorBrush x:Key="Brush.TextPrimary" Color="#1E1C1A" />
+    <SolidColorBrush x:Key="Brush.TextSecondary" Color="#55504A" />
+    <SolidColorBrush x:Key="Brush.TextMuted" Color="#8A837B" />
+
+    <!-- Vurgu -->
+    <SolidColorBrush x:Key="Brush.Accent" Color="#B4603A" />
+    <SolidColorBrush x:Key="Brush.AccentHover" Color="#9C5230" />
+    <SolidColorBrush x:Key="Brush.AccentForeground" Color="#FFFFFF" />
+
+    <!-- Durum -->
+    <SolidColorBrush x:Key="Brush.Danger" Color="#B4453A" />
+    <SolidColorBrush x:Key="Brush.Warning" Color="#8A6414" />
+    <SolidColorBrush x:Key="Brush.Success" Color="#4F7A3F" />
+
+    <!-- Etkileşim -->
+    <SolidColorBrush x:Key="Brush.Hover" Color="#000000" Opacity="0.04" />
+    <SolidColorBrush x:Key="Brush.Selected" Color="#B4603A" Opacity="0.12" />
+    <SolidColorBrush x:Key="Brush.Overlay" Color="#000000" Opacity="0.35" />
+
+    <!-- Platform kimlikleri -->
+    <SolidColorBrush x:Key="Brush.PlatformPs1" Color="#4C6B80" />
+    <SolidColorBrush x:Key="Brush.PlatformPs2" Color="#48539B" />
+    <SolidColorBrush x:Key="Brush.PlatformPs3" Color="#7A548C" />
+    <SolidColorBrush x:Key="Brush.PlatformPs4" Color="#8A837B" />
+    <SolidColorBrush x:Key="Brush.PlatformPs5" Color="#8A837B" />
+    <SolidColorBrush x:Key="Brush.PlatformUnknown" Color="#8A837B" />
+
+</ResourceDictionary>

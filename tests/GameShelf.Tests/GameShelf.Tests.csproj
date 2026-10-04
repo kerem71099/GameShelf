@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>GameShelf.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="xunit" Version="2.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\GameShelf.Application\GameShelf.Application.csproj" />
+    <ProjectReference Include="..\..\src\GameShelf.Domain\GameShelf.Domain.csproj" />
+    <ProjectReference Include="..\..\src\GameShelf.Infrastructure\GameShelf.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

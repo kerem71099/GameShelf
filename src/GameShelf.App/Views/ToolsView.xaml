@@ -1,0 +1,133 @@
+<UserControl x:Class="GameShelf.App.Views.ToolsView"
+             x:Name="ToolsRoot"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:GameShelf.Application.ViewModels;assembly=GameShelf.Application"
+             xmlns:entities="clr-namespace:GameShelf.Domain.Entities;assembly=GameShelf.Domain"
+             xmlns:converters="clr-namespace:GameShelf.App.Converters">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="{StaticResource Space.XL}" MaxWidth="920" HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="Araçlar" Style="{StaticResource TextDisplay}" />
+
+            <!-- ============================================== eylemler -->
+            <WrapPanel Grid.Row="1" Margin="0,20,0,0">
+                <Button Content="BIOS / firmware kontrolü" Style="{StaticResource ButtonSecondary}"
+                        Command="{Binding RunBiosCheckCommand}" />
+                <Button Content="Kayıp dosyaları bul" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
+                        Command="{Binding FindMissingCommand}" />
+                <Button Content="İçe aktarılmamış dosyalar" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
+                        Command="{Binding FindUnimportedCommand}" />
+                <Button Content="Yeniden tara (F5)" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
+                        Command="{Binding RescanCommand}" />
+                <Button Content="Log klasörünü aç" Margin="8,0,0,0" Style="{StaticResource ButtonGhost}"
+                        Command="{Binding OpenLogsCommand}" />
+                <Button Content="Veri klasörünü aç" Margin="8,0,0,0" Style="{StaticResource ButtonGhost}"
+                        Command="{Binding OpenDataFolderCommand}" />
+            </WrapPanel>
+
+            <ProgressBar Grid.Row="2" Margin="0,16,0,0" Style="{StaticResource ProgressBarBase}"
+                         Value="{Binding Progress}" Maximum="1"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+
+            <!-- ================================================ BIOS -->
+            <Border Grid.Row="3" Style="{StaticResource Panel}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="BIOS / FIRMWARE KONTROLÜ" Style="{StaticResource TextOverline}" />
+                    <TextBlock Text="{Binding LegalNote}" Style="{StaticResource TextMuted}" TextWrapping="Wrap"
+                               Margin="0,8,0,12" />
+
+                    <ItemsControl ItemsSource="{Binding BiosRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:BiosStatusRow}">
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding PlatformName}" Style="{StaticResource TextBodyStrong}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Path}" Style="{StaticResource TextMuted}"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding StatusText}"
+                                               Style="{StaticResource TextCaption}" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ============================================ kayıp + log -->
+            <Grid Grid.Row="4" Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Panel}" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="KAYIP DOSYALAR" Style="{StaticResource TextOverline}" />
+                        <ListBox ItemsSource="{Binding MissingGames}" Style="{StaticResource PlainListBox}"
+                                 ItemContainerStyle="{StaticResource RowListBoxItem}" MaxHeight="220" Margin="0,8,0,8">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:GameItemViewModel}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource TextBodyStrong}" />
+                                        <TextBlock Text="{Binding FilePath}" Style="{StaticResource TextMuted}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Button Content="Listedekileri kütüphaneden çıkar" Style="{StaticResource ButtonDanger}"
+                                Command="{Binding RemoveMissingCommand}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Panel}" Margin="8,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="LAUNCH LOG" Style="{StaticResource TextOverline}" />
+                        <ListBox ItemsSource="{Binding History}" Style="{StaticResource PlainListBox}"
+                                 ItemContainerStyle="{StaticResource RowListBoxItem}" MaxHeight="220" Margin="0,8,0,8">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type entities:LaunchHistoryEntry}">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource TextCaption}">
+                                            <Run Text="{Binding StartedAt}" />
+                                            <Run Text=" · " />
+                                            <Run Text="{Binding PlatformId}" />
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Arguments}" Style="{StaticResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Yenile" Style="{StaticResource ButtonSecondary}"
+                                    Command="{Binding LoadHistoryCommand}" />
+                            <Button Content="Temizle" Margin="8,0,0,0" Style="{StaticResource ButtonDanger}"
+                                    Command="{Binding ClearHistoryCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <TextBlock Grid.Row="5" Text="{Binding Output}" Style="{StaticResource TextCaption}" Margin="0,12,0,0" />
+        </Grid>
+    </ScrollViewer>
+</UserControl>

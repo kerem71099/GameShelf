@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- ============================================================
+         "Shelf" tasarım dili — tema bağımsız ölçek/tipografi token'ları
+         (renkler Theme.Dark / Theme.Light içinde; ayrıntı: docs/02)
+         ============================================================ -->
+
+    <!-- Spacing (4 px grid) -->
+    <sys:Double x:Key="Space.XS">4</sys:Double>
+    <sys:Double x:Key="Space.S">8</sys:Double>
+    <sys:Double x:Key="Space.M">12</sys:Double>
+    <sys:Double x:Key="Space.L">16</sys:Double>
+    <sys:Double x:Key="Space.XL">24</sys:Double>
+    <sys:Double x:Key="Space.XXL">32</sys:Double>
+    <sys:Double x:Key="Space.XXXL">48</sys:Double>
+
+    <!-- Köşe yarıçapları -->
+    <CornerRadius x:Key="Radius.Control">6</CornerRadius>
+    <CornerRadius x:Key="Radius.Card">12</CornerRadius>
+    <CornerRadius x:Key="Radius.Pill">999</CornerRadius>
+
+    <!-- Kenarlık kalınlıkları (gölge yerine hairline) -->
+    <Thickness x:Key="Thickness.Hairline">1</Thickness>
+    <Thickness x:Key="Thickness.Focus">2</Thickness>
+
+    <!-- Tipografi -->
+    <FontFamily x:Key="Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <FontFamily x:Key="Font.Body">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+    <sys:Double x:Key="FontSize.Display">28</sys:Double>
+    <sys:Double x:Key="FontSize.DisplaySmall">22</sys:Double>
+    <sys:Double x:Key="FontSize.Title">18</sys:Double>
+    <sys:Double x:Key="FontSize.Body">14</sys:Double>
+    <sys:Double x:Key="FontSize.Caption">12</sys:Double>
+    <sys:Double x:Key="FontSize.Overline">11</sys:Double>
+
+    <!-- Kontrol ölçüleri -->
+    <sys:Double x:Key="ControlHeight">32</sys:Double>
+    <sys:Double x:Key="ControlHeightLarge">40</sys:Double>
+    <sys:Double x:Key="CardWidth">168</sys:Double>
+    <sys:Double x:Key="CardCoverHeight">224</sys:Double>
+    <sys:Double x:Key="RowHeight">44</sys:Double>
+    <sys:Double x:Key="RailWidth">220</sys:Double>
+
+</ResourceDictionary>
