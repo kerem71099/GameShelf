@@ -30,7 +30,11 @@ public sealed class DuckStationBackend : EmulatorBackendBase
 
 /// <summary>
 /// PS2 — PCSX2 (Qt).
-/// Resmî CLI: --fullscreen / --nofullscreen ve "--" ayırıcısı (boşluklu/tire ile başlayan yollar için).
+/// Resmî CLI (pcsx2.net/docs/advanced/cli): bayraklar TEK TİRE ile yazılır:
+/// -batch, -nogui, -fullscreen, -nofullscreen, -bigpicture, -state, -disc ...
+/// "--" ayırıcısı: dosya adı boşluk içeriyorsa/tire ile başlıyorsa kullanılır.
+/// Eski (wxWidgets) sürümlerin "--fullscreen" yazımı Qt sürümünde
+/// "Unknown parameter" hatası verir — bu yüzden çift tire KULLANILMIYOR.
 /// </summary>
 public sealed class Pcsx2Backend : EmulatorBackendBase
 {
@@ -45,14 +49,29 @@ public sealed class Pcsx2Backend : EmulatorBackendBase
 
     public override string DefaultArgumentTemplate => "{fullscreen} {extra} -- \"{game}\"";
 
-    public override string FullscreenArgument => "--fullscreen";
+    public override string FullscreenArgument => "-fullscreen";
 
-    public override string NoFullscreenArgument => "--nofullscreen";
+    public override string NoFullscreenArgument => "-nofullscreen";
 
     public override bool RequiresBios => true;
 
     public override string BiosHint =>
         "PCSX2'nin 'bios' klasörünü seçin. BIOS'u kendi konsolunuzdan dump etmelisiniz.";
+
+    /// <summary>
+    /// Kullanıcı eski (wxWidgets) yazımı bir şablona kaydettiyse Qt sürümü
+    /// "Unknown parameter" hatası verir; bilinen bayrakları tek tireye çeviririz.
+    /// </summary>
+    public override string BuildArguments(EmulatorLaunchContext context)
+    {
+        var arguments = base.BuildArguments(context);
+
+        return arguments
+            .Replace("--fullscreen", "-fullscreen", StringComparison.Ordinal)
+            .Replace("--nofullscreen", "-nofullscreen", StringComparison.Ordinal)
+            .Replace("--nogui", "-nogui", StringComparison.Ordinal)
+            .Replace("--batch", "-batch", StringComparison.Ordinal);
+    }
 }
 
 /// <summary>

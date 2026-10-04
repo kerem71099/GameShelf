@@ -58,8 +58,8 @@ public sealed class EmulatorBackendTests
         var fullscreen = backend.BuildArguments(Context(@"D:\ps2\Final Fantasy X.iso", PlatformId.Ps2));
         var windowed = backend.BuildArguments(Context(@"D:\ps2\Final Fantasy X.iso", PlatformId.Ps2, fullscreen: false));
 
-        Assert.Equal("--fullscreen -- \"D:\\ps2\\Final Fantasy X.iso\"", fullscreen);
-        Assert.Equal("--nofullscreen -- \"D:\\ps2\\Final Fantasy X.iso\"", windowed);
+        Assert.Equal("-fullscreen -- \"D:\\ps2\\Final Fantasy X.iso\"", fullscreen);
+        Assert.Equal("-nofullscreen -- \"D:\\ps2\\Final Fantasy X.iso\"", windowed);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class EmulatorBackendTests
         var args = backend.BuildArguments(
             Context(@"D:\ps2\game.iso", PlatformId.Ps2, template: "-state 3 {fullscreen} -- \"{game}\""));
 
-        Assert.Equal("-state 3 --fullscreen -- \"D:\\ps2\\game.iso\"", args);
+        Assert.Equal("-state 3 -fullscreen -- \"D:\\ps2\\game.iso\"", args);
     }
 
     [Fact]
