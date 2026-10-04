@@ -32,15 +32,40 @@ git --version
 
 ### A) Git **yoksa** → ZIP ile indir (en kolay, önerilen)
 
-1. Şu adresi tarayıcıya yapıştır ve indir:
+#### A-1) Tek blok: indir + aç + derle + çalıştır (kopyala-yapıştır)
+
+PowerShell penceresine **tamamını** yapıştır ve Enter'a bas:
+
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+cd $HOME\Desktop
+Invoke-WebRequest -Uri "https://github.com/kerem71099/GameShelf/archive/refs/heads/arena/01a107bc-gameshelf.zip" -OutFile "GameShelf.zip"
+Expand-Archive -Path "GameShelf.zip" -DestinationPath "GameShelf" -Force
+cd GameShelf\GameShelf-arena-01a107bc-gameshelf
+dir
+dotnet run --project src\GameShelf.App\GameShelf.App.csproj
+```
+
+> Bu URL bir **komut değil, adrestir** — PowerShell'e tek başına yazarsan
+> “The term ... is not recognized” hatası alırsın. Ya yukarıdaki blokta olduğu gibi
+> `Invoke-WebRequest -Uri "..."` içinde kullan, ya tarayıcının adres çubuğuna yapıştır.
+
+#### A-2) Fare ile (hiç komut yazmadan)
+
+1. Tarayıcıyı aç, adres çubuğuna şunu yapıştır → Enter (indirme başlar):
    ```
    https://github.com/kerem71099/GameShelf/archive/refs/heads/arena/01a107bc-gameshelf.zip
    ```
-2. İnen ZIP'e **sağ tık → Tümünü ayıkla** (masaüstü iyidir).
-   Klasör adı şuna benzer: `GameShelf-arena-01a107bc-gameshelf`
-3. Klasörü aç; içinde `GameShelf.sln` ve `scripts` klasörünü görmelisin.
-4. **PowerShell'i bu klasörde aç:** Explorer adres çubuğuna `powershell` yaz → Enter.
-   (Veya klasörde boş bir yere **Shift + sağ tık → "PowerShell penceresini burada aç"**.)
+2. İnen `GameShelf-arena-01a107bc-gameshelf.zip` dosyasına **sağ tık → Tümünü ayıkla**
+3. Çıkan klasöre gir → `scripts` → **`run.bat` dosyasına çift tıkla**
+
+#### A-3) Hazır betik (PowerShell)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\download-and-run.ps1
+```
+
+(Betik: indirir → açar → `restore` → `build` → çalıştırır. Hata verirse nedenini yazar.)
 
 ### B) Git kurmak istersen (opsiyonel)
 
@@ -192,6 +217,7 @@ Veya ortam bilgini görmek için: `scripts\doctor.bat` → çıktısını payla�
 | Belirti | Çözüm |
 |---|---|
 | `git : The term 'git' is not recognized` | Git kurulu değil → ya ZIP ile indir (§2-A), ya Git kur (§2-B) |
+| `The term 'https://github.com/...' is not recognized` | URL’yi komut gibi yazmışsın → tarayıcı adres çubuğuna yapıştır ya da `Invoke-WebRequest -Uri "..."` kullan (§2 A-1) |
 | `cd : Cannot find path '...\GameShelf'` | Repo o klasörde değil → önce §2 ile kodu indir, sonra o klasöre `cd` yap |
 | `MSB1009: Proje dosyası yok` / `MSBUILD : error MSB1009` | Yanlış klasördesin → `GameShelf.sln` olan klasöre git |
 | `scripts\build-log.bat : The module 'scripts' could not be loaded` | PowerShell `.bat` dosyalarını böyle çalıştırmaz → proje klasöründe `scripts\run.bat` **çift tıkla**, ya da `cmd` / `powershell -File .\scripts\build-log.bat` kullan |
