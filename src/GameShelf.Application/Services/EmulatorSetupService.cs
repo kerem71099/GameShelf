@@ -141,6 +141,17 @@ public sealed class EmulatorSetupService
         yield return Path.Combine(BundledEmulatorDirectory, platformKey);
         yield return AppContext.BaseDirectory;
 
+        // Kaynaktan (dotnet run) çalıştırırken emulators\ depo kökünde kalır;
+        // EXE'nin birkaç üst klasörüne de bakalım.
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        for (var i = 0; i < 6 && directory is not null; i++)
+        {
+            yield return Path.Combine(directory.FullName, "emulators");
+            yield return Path.Combine(directory.FullName, "emulators", platformKey);
+            directory = directory.Parent;
+        }
+
         var vendor = platformKey switch
         {
             "Ps1" => "DuckStation",
