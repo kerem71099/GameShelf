@@ -146,6 +146,33 @@ Bu, SQLite native kütüphanesinin (`e_sqlite3.dll`) tek dosyadan düzgün açı
 
 ## 8. Sorun giderme
 
+### 8.1 İlk derlemede en sık görülen 5 hata
+
+| # | Hata | Anlamı | Çözüm |
+|---|---|---|---|
+| 1 | `MSB1003: Specify a project or solution file` | Yanlış klasördesin | `cd` ile `GameShelf.sln` olan klasöre git |
+| 2 | `NETSDK1045: .NET SDK does not support targeting .NET 8.0` | SDK 8 yok (veya eski) | .NET **8** SDK kur → `dotnet --version` |
+| 3 | `NETSDK1047: Assets file doesn't have a target for 'win-x64'` | RID paketi inmedi | `dotnet restore` → internet açık mı? Olmuyorsa `dotnet build GameShelf.sln` (RID'siz) dene |
+| 4 | `error NU1101 / NU1102: Unable to find package ...` | NuGet erişimi yok | VPN/proxy kapat, `dotnet nuget locals all --clear`, `dotnet restore` |
+| 5 | `error CS0246 / CS0535 / CS1061` | Kod derleme hatası | Aşağıdaki “hatayı paylaşma” adımlarıyla bana gönder |
+
+> **Not (`NETSDK1047`)**: bu sürümde RID artık csproj’da sabit değil
+> (`RuntimeIdentifiers`), yalnızca `publish-exe.bat` içinde `-r win-x64` geçiliyor.
+> Depoyu en son hâline güncellediysen bu hata oluşmaz.
+
+### 8.2 Hatayı bana nasıl göndereceksin (en hızlı yol)
+
+```powershell
+scripts\build-log.bat          # tum ciktiyii build-log.txt dosyasina yazar
+```
+
+`build-log.txt` dosyasını aç, içindeki **`error ...` ile başlayan ilk 10–15 satırı**
+kopyalayıp bana yapıştır. (Alternatif: terminalde sağ tık → “Seç/hepsini seç” → kopyala.)
+
+Veya ortam bilgini görmek için: `scripts\doctor.bat` → çıktısını paylaş.
+
+### 8.3 Genel tablo
+
 | Belirti | Çözüm |
 |---|---|
 | `'dotnet' is not recognized` | .NET 8 SDK kurulu değil → yükle, **yeni** bir PowerShell aç |
