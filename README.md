@@ -91,6 +91,8 @@ DuckStation/PCSX2/RPCS3 exe yollarını ver.
 | `scripts/test.bat [filtre]` | Testleri çalıştır |
 | `scripts/publish-exe.bat` | Tek EXE üret (framework-dependent / self-contained) |
 | `scripts/open-data-folder.bat` | `%LOCALAPPDATA%\GameShelf` klasörünü aç |
+| `scripts/build-log.bat` | Tüm derleme çıktısını `build-log.txt`'e yazar |
+| `scripts/doctor.bat` | Ortam kontrolü (SDK, branch, veri klasörü) |
 
 Ayrıntılı kurulum + sorun giderme: [`docs/08-Kendi-Bilgisayarinda-Calistirma.md`](docs/08-Kendi-Bilgisayarinda-Calistirma.md)
 
