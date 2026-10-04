@@ -1,4 +1,5 @@
 using GameShelf.Domain.Enums;
+using GameShelf.Domain.Models;
 
 namespace GameShelf.Infrastructure.Emulators;
 
