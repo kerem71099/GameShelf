@@ -110,6 +110,14 @@ public sealed partial class ToolsViewModel : ViewModelBase
 
     public string LegalNote => BiosCheckService.Notice;
 
+    /// <summary>BIOS'un yasal olarak nasıl edinileceğinin adımları (dosya sağlanmaz).</summary>
+    public IReadOnlyList<string> BiosGuideSteps => BiosGuide.Steps;
+
+    /// <summary>Resmî dokümantasyonu tarayıcıda açar (BIOS indirme bağlantısı değil).</summary>
+    [RelayCommand]
+    private void OpenBiosGuide()
+        => _shell.OpenUrl(BiosGuide.OfficialGuideUrl);
+
     public string LogDirectory => _settings.Current.LogDirectory;
 
     [ObservableProperty] private string _output = string.Empty;

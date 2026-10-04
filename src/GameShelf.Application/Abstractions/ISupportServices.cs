@@ -70,6 +70,9 @@ public interface IShellService
     void RevealInExplorer(string path);
 
     void OpenFolder(string path);
+
+    /// <summary>Resmî dokümantasyon/bilgi sayfasını varsayılan tarayıcıda açar (indirme bağlantısı değil).</summary>
+    void OpenUrl(string url);
 }
 
 /// <summary>Plugin klasöründen backend yükleme (manifest + opsiyonel imzalı DLL).</summary>

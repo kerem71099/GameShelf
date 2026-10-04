@@ -101,9 +101,13 @@ public sealed class FakeShellService : IShellService
 
     public List<string> Opened { get; } = new();
 
+    public List<string> Urls { get; } = new();
+
     public void RevealInExplorer(string path) => Revealed.Add(path);
 
     public void OpenFolder(string path) => Opened.Add(path);
+
+    public void OpenUrl(string url) => Urls.Add(url);
 }
 
 /// <summary>Emülatörü GERÇEKTEN başlatmayan process launcher (launch smoke testi).</summary>

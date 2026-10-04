@@ -146,6 +146,28 @@ Ayrıca `Ayarlar → Emülatörler` ekranından da yol gösterebilirsin.
 
 ---
 
+### BIOS'u nereden edineceğim? (yasal tek yol)
+
+**İnternetten indirilemez.** BIOS, konsolun kendi sistem yazılımıdır ve Sony'nin telifli
+ürünüdür; indirmek, oyun ROM'u/ISO indirmekle aynı şeydir. Bu yüzden PCSX2, DuckStation ve
+RPCS3 de dâhil hiçbir yasal emülatör BIOS dağıtmaz — GameShelf de dağıtmaz, bağlantı vermez.
+
+**Tek yasal yol: sahip olduğun konsoldan BIOS'u kendin çıkarmak (dump).**
+
+1. Gerekenler: PS2 konsolu (fat/slim), FreeMcBoot bellek kartı (yoksa FreeDVDBoot/modchip),
+   FAT32 USB bellek, `uLaunchELF` ve `biosdrain.elf`.
+2. USB'yi FAT32 yap → `biosdrain.elf`'i kök klasöre kopyala.
+3. PS2'de uLaunchELF'i aç → `mass:/` içinden `biosdrain.elf`'i çalıştır → 2-5 dk bekle.
+4. USB'yi PC'ye tak: `SCPH-XXXXX.bin` dosyasını GameShelf'in "Klasörü aç" ile açtığı
+   BIOS klasörüne kopyala. Geçerli bir PS2 BIOS tam olarak **4.194.304 bayt** (4 MB).
+5. PS1 için kural aynı (512 KB). Not: DuckStation, **PS2 BIOS'unu da** kullanabilir.
+
+**Konsolun yoksa:** ikinci el bir PS2 alıp BIOS'unu dump ettikten sonra geri satabilirsin.
+Bunun dışında yasal bir yol yok.
+
+Bu rehber ayrıca uygulamanın içinde de duruyor:
+`Araçlar → BIOS / FIRMWARE KONTROLÜ → ❓ BIOS'U NASIL EDİNİRİM? (yasal yol)`
+
 ## 3) Kendi oyun klasörü
 
 İlk açılışta uygulama şu klasörü oluşturur ve kütüphaneye ekler:

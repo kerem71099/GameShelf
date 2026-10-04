@@ -40,4 +40,21 @@ public sealed class ShellService : IShellService
             // yoksay
         }
     }
+
+    public void OpenUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url) || !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+            // yoksay
+        }
+    }
 }
