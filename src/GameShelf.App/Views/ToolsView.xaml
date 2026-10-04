@@ -69,6 +69,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="120" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding PlatformName}" Style="{StaticResource TextBodyStrong}" />
                                     <TextBlock Grid.Column="1" Text="{Binding DisplayPath}" Style="{StaticResource TextMuted}"
@@ -82,6 +83,11 @@
                                             Visibility="{Binding HasTargetDirectory, Converter={StaticResource BoolToVisibility}}"
                                             Command="{Binding DataContext.OpenBiosFolderCommand, ElementName=ToolsRoot}"
                                             CommandParameter="{Binding TargetDirectory}" />
+                                    <!-- elindeki BIOS DOSYASINI seç (USB / İndirilenler fark etmez) -->
+                                    <Button Grid.Column="4" Content="Dosya seç" Margin="8,0,0,0"
+                                            Style="{StaticResource ButtonGhost}"
+                                            Command="{Binding DataContext.PickBiosFileCommand, ElementName=ToolsRoot}"
+                                            CommandParameter="{Binding PlatformId}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

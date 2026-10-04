@@ -6,6 +6,7 @@ using GameShelf.Application.Models;
 using GameShelf.Application.Services;
 using GameShelf.Domain.Entities;
 using GameShelf.Domain.Enums;
+using GameShelf.Domain.Extensions;
 using GameShelf.Domain.Interfaces;
 
 namespace GameShelf.Application.ViewModels;
@@ -379,6 +380,83 @@ public sealed partial class ToolsViewModel : ViewModelBase
         {
             Logger.Error(nameof(ToolsViewModel), "BIOS klasörü açılamadı.", ex);
             Output = $"Klasör açılamadı: {directory}";
+        }
+    }
+
+    /// <summary>
+    /// Kullanıcı elindeki BIOS DOSYASINI seçer (USB/İndirilenler/Masaüstü fark etmez).
+    /// GameShelf yalnızca YOLU kaydeder; dosyayı taşımaz/kopyalamaz. Emülatör kendi
+    /// klasörünü okuduğu için dosya orada değilse iki klasörü de açıp uyarırız.
+    /// </summary>
+    [RelayCommand]
+    private void PickBiosFile(PlatformId platformId)
+    {
+        var file = _dialogs.OpenFile(
+            $"{platformId.ToShortName()} BIOS dosyasını seç",
+            "BIOS dosyası|*.bin|Tüm dosyalar|*.*");
+
+        if (string.IsNullOrWhiteSpace(file))
+        {
+            return;
+        }
+
+        _ = SavePickedBiosAsync(platformId, file);
+    }
+
+    private async Task SavePickedBiosAsync(PlatformId platformId, string file)
+    {
+        try
+        {
+            await _biosCheck.SetBiosPathAsync(platformId, file).ConfigureAwait(false);
+
+            var size = new FileInfo(file).Length;
+            var expected = platformId switch
+            {
+                PlatformId.Ps2 => 4L * 1024 * 1024,
+                PlatformId.Ps1 => 512L * 1024,
+                _ => 0L
+            };
+
+            var sizeNote = expected > 0 && size != expected
+                ? $" Dikkat: dosya {size} bayt, beklenen {expected} bayt — bu geçerli bir {platformId.ToShortName()} BIOS'u olmayabilir."
+                : string.Empty;
+
+            var configs = await _repository.GetEmulatorConfigsAsync(CancellationToken.None).ConfigureAwait(false);
+            var exePath = configs.FirstOrDefault(c => c.PlatformId == platformId)?.ExecutablePath;
+            var target = BiosLocator.RecommendedDirectory(platformId, exePath);
+            var source = Path.GetDirectoryName(file);
+
+            if (target is not null && !string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
+            {
+                // Emülatör yalnızca kendi klasörünü okur: kaynak ve hedefi birlikte açıyoruz.
+                try
+                {
+                    Directory.CreateDirectory(target);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warning(nameof(ToolsViewModel), $"Hedef klasör oluşturulamadı: {target} - {ex.Message}");
+                }
+
+                _shell.RevealInExplorer(file);
+                _shell.OpenFolder(target);
+
+                Output =
+                    $"BIOS yolu kaydedildi: {file}{sizeNote}{Environment.NewLine}" +
+                    $"Emülatör bu klasörü okuyor: {target}{Environment.NewLine}" +
+                    "İki klasör de açıldı: dosyayı soldakinden sağdakine sürükle, sonra '⚡ Otomatik kurulum'a bas.";
+            }
+            else
+            {
+                Output = $"BIOS yolu kaydedildi: {file}{sizeNote}";
+            }
+
+            await LoadBiosRowsAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(nameof(ToolsViewModel), "BIOS dosyası kaydedilemedi.", ex);
+            Output = $"BIOS kaydedilemedi: {ex.Message}";
         }
     }
 

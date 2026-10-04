@@ -24,6 +24,7 @@ public static class BiosGuide
         "Gerekenler: PS2 konsolu (fat/slim), FreeMcBoot bellek kartı (yoksa FreeDVDBoot veya modchip), FAT32 biçimli bir USB bellek, uLaunchELF ve biosdrain.elf programı.",
         "Adımlar: USB'yi FAT32 yap → biosdrain.elf'i USB'nin köküne kopyala → PS2'de uLaunchELF'i aç → mass:/ içinden biosdrain.elf'i çalıştır → 2-5 dakika bekle.",
         "Çıkan SCPH-XXXXX.bin dosyasını USB'den bu ekrandaki 'Klasörü aç' düğmesinin açtığı klasöre kopyala. Geçerli bir PS2 BIOS tam olarak 4.194.304 bayt (4 MB) olur.",
+        "Önemli: emülatör SADECE kendi BIOS klasörünü okur. GameShelf'e yolu göstermek yetmez; dosyanın o klasörün İÇİNDE olması gerekir. 'Dosya seç' düğmesi dosyayı bulunduğu yerden seçmeni sağlar, gerekirse kaynak ve hedef klasörü yan yana açar.",
         "PS1 için de kural aynı (BIOS 512 KB). Not: DuckStation, PS2 BIOS'unu da kullanabilir — tek bir dump iki işi görür.",
         "Konsolun yok mu? İkinci el bir PS2 alıp BIOS'unu dump ettikten sonra geri satabilirsin. Bunun dışında yasal bir yol yok.",
     ];
