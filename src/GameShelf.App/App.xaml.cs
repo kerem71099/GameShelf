@@ -134,12 +134,34 @@ public partial class App : System.Windows.Application
         };
     }
 
+    private static readonly object ErrorGate = new();
+    private static string? _lastErrorText;
+    private static DateTime _lastErrorAt;
+
+    /// <summary>
+    /// Hata penceresi. Ayni hata 10 saniye icinde tekrar gelirse gosterilmez;
+    /// boylece tek bir sorun onlarca pencere olarak onumuze yagmaz (hepsi log'a yazilir).
+    /// </summary>
     private static void LogAndShow(Exception exception)
     {
         LogSafe(exception);
 
+        var text = $"{exception.GetType().Name}: {exception.Message}";
+        var now = DateTime.Now;
+
+        lock (ErrorGate)
+        {
+            if (_lastErrorText == text && now - _lastErrorAt < TimeSpan.FromSeconds(10))
+            {
+                return;
+            }
+
+            _lastErrorText = text;
+            _lastErrorAt = now;
+        }
+
         System.Windows.MessageBox.Show(
-            $"Beklenmeyen bir hata oluştu:\n\n{exception.Message}\n\n" +
+            $"Beklenmeyen bir hata oluştu:\n\n{text}\n\n" +
             $"Ayrıntılar: {Path.Combine(AppPaths.LogDirectory, $"app-{DateTime.Now:yyyyMMdd}.log")}",
             "GameShelf",
             System.Windows.MessageBoxButton.OK,
