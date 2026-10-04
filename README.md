@@ -67,6 +67,33 @@ dotnet publish src/GameShelf.App/GameShelf.App.csproj -c Release -r win-x64 `
 Opsiyonel installer: MSIX (Windows Application Packaging Project) veya Inno Setup / WiX —
 detaylar `docs/00` içinde.
 
+## Kendi bilgisayarında çalıştırma (Windows)
+
+**En kolay yol:** `scripts\run.bat` dosyasına çift tıkla (restore → build → run).
+
+```powershell
+# veya komut satırından
+git clone https://github.com/kerem71099/GameShelf.git
+cd GameShelf
+git checkout arena/01a107bc-gameshelf
+dotnet restore GameShelf.sln
+dotnet build   GameShelf.sln -c Debug
+dotnet run --project src/GameShelf.App/GameShelf.App.csproj
+```
+
+Uygulama açıldıktan sonra: **Ayarlar → Kütüphane klasörleri → klasör ekle → Kaydet**,
+sonra **Araçlar → Yeniden tara**, ardından **Ayarlar → Emülatörler** bölümünden
+DuckStation/PCSX2/RPCS3 exe yollarını ver.
+
+| Betik | İş |
+|---|---|
+| `scripts/run.bat` | Derle ve çalıştır |
+| `scripts/test.bat [filtre]` | Testleri çalıştır |
+| `scripts/publish-exe.bat` | Tek EXE üret (framework-dependent / self-contained) |
+| `scripts/open-data-folder.bat` | `%LOCALAPPDATA%\GameShelf` klasörünü aç |
+
+Ayrıntılı kurulum + sorun giderme: [`docs/08-Kendi-Bilgisayarinda-Calistirma.md`](docs/08-Kendi-Bilgisayarinda-Calistirma.md)
+
 ## Dokümantasyon
 
 | Dosya | İçerik |
@@ -79,6 +106,7 @@ detaylar `docs/00` içinde.
 | [`docs/05-Plugin-Mimarisi.md`](docs/05-Plugin-Mimarisi.md) | Manifest tabanlı plugin taslağı (PS4/PS5 placeholder) |
 | [`docs/06-Yol-Haritasi-ve-Test-Plani.md`](docs/06-Yol-Haritasi-ve-Test-Plani.md) | MVP → v1 → v2, test planı |
 | [`docs/07-Adim-Adim-Rehber.md`](docs/07-Adim-Adim-Rehber.md) | **Sıfırdan, adım adım uygulama rehberi** |
+| [`docs/08-Kendi-Bilgisayarinda-Calistirma.md`](docs/08-Kendi-Bilgisayarinda-Calistirma.md) | **Kurulum, ilk çalıştırma, tek EXE, sorun giderme** |
 
 ## Platform desteği
 
