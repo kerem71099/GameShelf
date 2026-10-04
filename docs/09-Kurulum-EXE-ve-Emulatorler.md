@@ -74,6 +74,9 @@ ekranlarında görünür. **Araçlar → "⚡ Otomatik kurulum"** düğmesi ayn�
 - **BIOS'un yoksa:** `Araçlar → BIOS / FIRMWARE KONTROLÜ` satırındaki **"Klasörü aç"**
   düğmesi emülatörün BIOS'u aradığı klasörü açar (gerekirse oluşturur). Kendi BIOS'unu
   oraya sürükle, sonra **"⚡ Otomatik kurulum"** ile yenile.
+- **PCSX2 hangi klasörü okur?** Kurulum tipine göre değişir: `portable.ini` exe'nin
+  yanındaysa **exe'nin yanındaki `bios`**, yoksa **`Belgelerim\PCSX2\bios`**. GameShelf bu
+  ayrımı kendisi yapar; "Klasörü aç" düğmesi PCSX2'nin gerçekten okuduğu klasörü açar.
 - **Emülatör hemen kapanırsa:** emülatörün konsola yazdığı mesaj artık log'a yazılır ve
   ekranda gösterilir (`Unknown parameter: ...` gibi). Emülatör mesaj yazmazsa log'a bak:
   `%LOCALAPPDATA%\GameShelf\logs\app-YYYY-AA-GG.log`.

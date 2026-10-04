@@ -29,6 +29,14 @@ public sealed partial class BiosStatusRow : ObservableObject
 
     public bool HasTargetDirectory => !string.IsNullOrWhiteSpace(TargetDirectory);
 
+    /// <summary>Yol yoksa kullanıcıya hedef klasörü gösterir (BIOS'u nereye koyacağını bilsin).</summary>
+    public string DisplayPath =>
+        !string.IsNullOrWhiteSpace(Path)
+            ? Path
+            : HasTargetDirectory
+                ? TargetDirectory + "  \u2190 BIOS'u buraya koy"
+                : string.Empty;
+
     public string StatusText => !Configured ? "Yapılandırılmadı" : Exists ? "Bulundu" : "Yol geçersiz";
 
     public string StatusBrushKey => !Configured ? "Brush.TextMuted" : Exists ? "Brush.Success" : "Brush.Warning";

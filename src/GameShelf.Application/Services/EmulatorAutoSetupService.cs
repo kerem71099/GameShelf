@@ -142,6 +142,7 @@ public sealed class EmulatorAutoSetupService
         if (force || !biosValid)
         {
             var detected = await Task.Run(() => BiosLocator.Find(platform, exePath), cancellationToken).ConfigureAwait(false);
+            var target = BiosLocator.RecommendedDirectory(platform, exePath);
 
             if (detected is not null && !string.Equals(detected, biosPath, StringComparison.OrdinalIgnoreCase))
             {
@@ -149,6 +150,20 @@ public sealed class EmulatorAutoSetupService
                 report.Changed = true;
                 report.Lines.Add($"{label} BIOS klasörü bulundu: {detected}");
                 _logger.Info(Category, $"{label} BIOS klasörü otomatik bulundu: {detected}");
+
+                if (target is not null && !string.Equals(detected, target, StringComparison.OrdinalIgnoreCase))
+                {
+                    report.Lines.Add(
+                        $"{label}: emülatörün okuduğu klasör farklı → {target} " +
+                        "(Araçlar → BIOS → Klasörü aç)");
+                }
+            }
+            else if (detected is null && !biosValid)
+            {
+                report.Lines.Add(
+                    $"{label} BIOS'u bulunamadı → kendi BIOS'unu şu klasöre koy: {target} " +
+                    "(Araçlar → BIOS → Klasörü aç)");
+                _logger.Warning(Category, $"{label} BIOS klasörü bulunamadı (beklenen: {target}).");
             }
         }
     }

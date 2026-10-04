@@ -71,7 +71,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding PlatformName}" Style="{StaticResource TextBodyStrong}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Path}" Style="{StaticResource TextMuted}"
+                                    <TextBlock Grid.Column="1" Text="{Binding DisplayPath}" Style="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding StatusText}"
                                                Style="{StaticResource TextCaption}" VerticalAlignment="Center" />

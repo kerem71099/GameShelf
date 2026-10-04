@@ -54,6 +54,14 @@ public static class BiosLocator
     {
         var directories = new List<string>();
 
+        // 1) Emülatörün GERÇEKTEN okuduğu klasör (PCSX2 "Veri Dizinini Aç" ile aynı yer).
+        var dataDirectory = DataDirectory(platformId, emulatorExePath);
+
+        if (!string.IsNullOrWhiteSpace(dataDirectory))
+        {
+            AddBiosSubDirectory(directories, platformId, dataDirectory);
+        }
+
         if (!string.IsNullOrWhiteSpace(emulatorExePath))
         {
             var exeDirectory = Path.GetDirectoryName(emulatorExePath);
@@ -123,17 +131,52 @@ public static class BiosLocator
         => CandidateDirectories(platformId, emulatorExePath)
             .FirstOrDefault(directory => !string.IsNullOrWhiteSpace(directory));
 
-    private static void AddEmulatorRelative(List<string> directories, PlatformId platformId, string baseDirectory)
+    /// <summary>
+    /// Emülatörün veri dizini: BIOS'u okuduğu/araması gereken asıl yer.
+    /// PCSX2: <c>portable.ini</c> exe'nin yanındaysa exe dizini, yoksa Belgelerim\PCSX2.
+    /// DuckStation: <c>portable.txt</c> exe'nin yanındaysa exe dizini, yoksa Belgelerim\DuckStation.
+    /// RPCS3: %USERPROFILE%\RPCS3 (firmware bunun altındaki dev_flash'ta durur).
+    /// </summary>
+    public static string? DataDirectory(PlatformId platformId, string? emulatorExePath)
     {
-        if (platformId == PlatformId.Ps3)
+        var exeDirectory = string.IsNullOrWhiteSpace(emulatorExePath)
+            ? null
+            : Path.GetDirectoryName(emulatorExePath);
+
+        var portable = !string.IsNullOrWhiteSpace(exeDirectory)
+                       && File.Exists(Path.Combine(exeDirectory, PortableMarker(platformId)));
+
+        if (portable)
         {
-            // RPCS3 firmware'i dev_flash klasöründe durur.
-            directories.Add(Path.Combine(baseDirectory, "dev_flash"));
-            return;
+            return exeDirectory;
         }
 
-        directories.Add(Path.Combine(baseDirectory, "bios"));
+        return platformId switch
+        {
+            PlatformId.Ps2 => Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PCSX2"),
+            PlatformId.Ps1 => Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DuckStation"),
+            PlatformId.Ps3 => Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "RPCS3"),
+            _ => null
+        };
     }
+
+    private static string PortableMarker(PlatformId platformId) => platformId switch
+    {
+        PlatformId.Ps2 => "portable.ini",
+        PlatformId.Ps1 => "portable.txt",
+        _ => "portable.ini"
+    };
+
+    private static void AddBiosSubDirectory(List<string> directories, PlatformId platformId, string dataDirectory)
+        => directories.Add(platformId == PlatformId.Ps3
+            ? Path.Combine(dataDirectory, "dev_flash")
+            : Path.Combine(dataDirectory, "bios"));
+
+    private static void AddEmulatorRelative(List<string> directories, PlatformId platformId, string baseDirectory)
+        => AddBiosSubDirectory(directories, platformId, baseDirectory);
 
     private static void AddKnown(List<string> directories, string? root, params string[] parts)
     {
