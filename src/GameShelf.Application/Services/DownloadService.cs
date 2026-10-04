@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using GameShelf.Application.Abstractions;
 using GameShelf.Application.Models;
 
 namespace GameShelf.Application.Services;
@@ -16,10 +17,12 @@ public sealed record DownloadOutcome(bool Success, string Message, string? Path)
 /// </summary>
 public sealed class DownloadService : IDisposable
 {
+    private readonly ILoggingService? _logger;
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(30) };
 
-    public DownloadService()
+    public DownloadService(ILoggingService? logger = null)
     {
+        _logger = logger;
         _http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GameShelf", "0.1"));
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
@@ -190,10 +193,13 @@ public sealed class DownloadService : IDisposable
             throw new InvalidOperationException("Bu kalem için indirme kaynağı tanımlı değil.");
         }
 
+        var names = new List<string>();
+
         // 1) En son sürüm
         var latest = await TryFindAssetAsync(
                 $"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases/latest",
                 item,
+                names,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -203,8 +209,9 @@ public sealed class DownloadService : IDisposable
         }
 
         // 2) Son 10 sürüm: kimi projeler (örn. RPCS3) en son sürümde dosya yayınlamaz.
-        var listJson = await _http
-            .GetStringAsync($"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases?per_page=10", cancellationToken)
+        var listJson = await FetchAsync(
+                $"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases?per_page=10",
+                cancellationToken)
             .ConfigureAwait(false);
 
         using var list = JsonDocument.Parse(listJson);
@@ -213,31 +220,39 @@ public sealed class DownloadService : IDisposable
         {
             if (release.ValueKind == JsonValueKind.Object
                 && release.TryGetProperty("assets", out var assets)
-                && MatchAsset(assets, item) is { } url)
+                && MatchAsset(assets, item, names) is { } url)
             {
                 return url;
             }
         }
 
+        _logger?.Warning(nameof(DownloadService),
+            $"{item.Owner}/{item.Repo}: uygun dosya yok. Görülen dosyalar: {string.Join(", ", names)}");
+
         throw new InvalidOperationException(
-            $"Bu sürümde uygun Windows dosyası bulunamadı ({item.Owner}/{item.Repo}). " +
-            $"Resmî sayfadan elle indirebilirsin: {item.PageUrl ?? "-"}");
+            $"Uygun Windows dosyası bulunamadı ({item.Owner}/{item.Repo}). " +
+            $"Görülen dosyalar: {(names.Count == 0 ? "hiç yok" : string.Join(", ", names))}. " +
+            $"Resmî sayfadan elle indirebilirsin: {item.PageUrl}");
     }
 
     /// <summary>Tek bir sürümün dosyalarına bakar; uyan dosya yoksa null.</summary>
-    private async Task<string?> TryFindAssetAsync(string url, DownloadCatalogItem item, CancellationToken cancellationToken)
+    private async Task<string?> TryFindAssetAsync(
+        string url,
+        DownloadCatalogItem item,
+        List<string> names,
+        CancellationToken cancellationToken)
     {
-        var json = await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
+        var json = await FetchAsync(url, cancellationToken).ConfigureAwait(false);
 
         using var document = JsonDocument.Parse(json);
 
         return document.RootElement.TryGetProperty("assets", out var assets)
-            ? MatchAsset(assets, item)
+            ? MatchAsset(assets, item, names)
             : null;
     }
 
     /// <summary>Sürümdeki dosyalar arasından Windows'a uyanı seçer (sembol/şema dosyaları hariç).</summary>
-    private static string? MatchAsset(JsonElement assets, DownloadCatalogItem item)
+    private static string? MatchAsset(JsonElement assets, DownloadCatalogItem item, List<string>? names = null)
     {
         string? fallback = null;
 
@@ -251,6 +266,8 @@ public sealed class DownloadService : IDisposable
 
             var name = nameElement.GetString() ?? string.Empty;
             var url = urlElement.GetString();
+
+            names?.Add(name);
 
             if (string.IsNullOrWhiteSpace(url) || url.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
             {
@@ -271,6 +288,34 @@ public sealed class DownloadService : IDisposable
         }
 
         return fallback;
+    }
+
+    /// <summary>GitHub API çağrısı: hata olursa anlaşılır mesaj (log'a da yazar).</summary>
+    private async Task<string> FetchAsync(string url, CancellationToken cancellationToken)
+    {
+        _logger?.Debug(nameof(DownloadService), "GitHub API: " + url);
+
+        try
+        {
+            return await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger?.Error(nameof(DownloadService), "GitHub API isteği başarısız: " + url, ex);
+
+            var status = ex.StatusCode is { } code ? $"{(int)code} ({code})" : "ağ hatası";
+
+            throw new InvalidOperationException(
+                $"GitHub'a ulaşılamadı [{status}]. İnternet bağlantısını kontrol et; " +
+                "istersen resmî sayfadan elle indirebilirsin.", ex);
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger?.Error(nameof(DownloadService), "GitHub API zaman aşımı: " + url, ex);
+
+            throw new InvalidOperationException(
+                "GitHub yanıt vermedi (zaman aşımı). Biraz sonra tekrar dene.", ex);
+        }
     }
 
     private async Task DownloadFileAsync(string url, string destination, IProgress<double>? progress, CancellationToken cancellationToken)

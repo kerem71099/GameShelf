@@ -17,7 +17,11 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="İndirme Merkezi" Style="{StaticResource TextDisplay}" />
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="İndirme Merkezi" Style="{StaticResource TextDisplay}" />
+                <TextBlock Text="{Binding AppVersion}" Style="{StaticResource TextCaption}"
+                           Margin="0,4,0,0" />
+            </StackPanel>
 
             <TextBlock Grid.Row="1" Text="{Binding Note}" Style="{StaticResource TextMuted}"
                        TextWrapping="Wrap" Margin="0,8,0,20" />

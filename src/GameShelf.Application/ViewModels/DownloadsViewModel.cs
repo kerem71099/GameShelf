@@ -44,6 +44,9 @@ public sealed partial class DownloadsViewModel : ViewModelBase
         _shell = shell;
     }
 
+    /// <summary>Hangi derleme çalışıyor (destek sırasında sürüm karışmasın).</summary>
+    public string AppVersion => BuildStamp.Display;
+
     public ObservableCollection<DownloadRow> Rows { get; } = new();
 
     public string Note =>
