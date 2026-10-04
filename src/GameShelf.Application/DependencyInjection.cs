@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddSingleton<ICoverImageService, CoverImageService>();
         services.AddSingleton<LibraryMaintenanceService>();
         services.AddSingleton<BiosCheckService>();
+        services.AddSingleton<EmulatorSetupService>();
 
         // ViewModel'ler: her navigasyonda yeniden üretilmesi ucuz ve güvenli.
         services.AddTransient<MainViewModel>();

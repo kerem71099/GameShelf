@@ -6,6 +6,7 @@ using GameShelf.Application.Models;
 using GameShelf.Application.Services;
 using GameShelf.Domain.Entities;
 using GameShelf.Domain.Enums;
+using GameShelf.Domain.Interfaces;
 
 namespace GameShelf.Application.ViewModels;
 
@@ -28,12 +29,32 @@ public sealed partial class BiosStatusRow : ObservableObject
     public string StatusBrushKey => !Configured ? "Brush.TextMuted" : Exists ? "Brush.Success" : "Brush.Warning";
 }
 
+/// <summary>Araçlar ekranındaki emülatör kurulum satırı.</summary>
+public sealed partial class EmulatorSetupRow : ObservableObject
+{
+    public string PlatformKey { get; init; } = string.Empty;
+
+    public string PlatformName { get; init; } = string.Empty;
+
+    public string EmulatorName { get; init; } = string.Empty;
+
+    public string Hint { get; init; } = string.Empty;
+
+    [ObservableProperty] private string _exePath = string.Empty;
+
+    [ObservableProperty] private string _statusText = string.Empty;
+
+    [ObservableProperty] private string _statusBrushKey = "Brush.TextMuted";
+}
+
 /// <summary>Tools ekranı: BIOS kontrolü, kayıp dosyalar, içe aktarılmamış dosyalar, yeniden tarama, log.</summary>
 public sealed partial class ToolsViewModel : ViewModelBase
 {
     private readonly ILibraryRepository _repository;
     private readonly LibraryMaintenanceService _maintenance;
     private readonly BiosCheckService _biosCheck;
+    private readonly EmulatorSetupService _emulatorSetup;
+    private readonly IEmulatorBackendFactory _backends;
     private readonly ISettingsService _settings;
     private readonly IShellService _shell;
     private readonly IDialogService _dialogs;
@@ -44,6 +65,8 @@ public sealed partial class ToolsViewModel : ViewModelBase
         ILibraryRepository repository,
         LibraryMaintenanceService maintenance,
         BiosCheckService biosCheck,
+        EmulatorSetupService emulatorSetup,
+        IEmulatorBackendFactory backends,
         ISettingsService settings,
         IShellService shell,
         IDialogService dialogs,
@@ -54,6 +77,8 @@ public sealed partial class ToolsViewModel : ViewModelBase
         _repository = repository;
         _maintenance = maintenance;
         _biosCheck = biosCheck;
+        _emulatorSetup = emulatorSetup;
+        _backends = backends;
         _settings = settings;
         _shell = shell;
         _dialogs = dialogs;
@@ -233,4 +258,142 @@ public sealed partial class ToolsViewModel : ViewModelBase
     [RelayCommand]
     private void OpenDataFolder()
         => _shell.OpenFolder(Path.GetDirectoryName(_settings.Current.DatabasePath) ?? ".");
+
+    // ---------------------------------------------------------- kurulum / eksikler
+
+    public ObservableCollection<EmulatorSetupRow> SetupRows { get; } = new();
+
+    public string SetupNote => EmulatorSetupService.Notice;
+
+    public string GamesDirectory => EmulatorSetupService.GamesDirectory;
+
+    [RelayCommand]
+    private async Task RefreshSetupAsync()
+    {
+        await RunBusyAsync(async ct =>
+        {
+            var configs = await _repository.GetEmulatorConfigsAsync(ct).ConfigureAwait(false);
+            var rows = new List<EmulatorSetupRow>();
+
+            foreach (var info in _emulatorSetup.Downloads)
+            {
+                if (!TryParsePlatform(info.PlatformKey, out var platform))
+                {
+                    continue;
+                }
+
+                var config = configs.FirstOrDefault(c => c.PlatformId == platform);
+                var configured = config is not null && !string.IsNullOrWhiteSpace(config.ExecutablePath);
+                var exists = configured && File.Exists(config!.ExecutablePath!);
+
+                rows.Add(new EmulatorSetupRow
+                {
+                    PlatformKey = info.PlatformKey,
+                    PlatformName = info.PlatformName,
+                    EmulatorName = info.EmulatorName,
+                    Hint = info.Hint,
+                    ExePath = config?.ExecutablePath ?? string.Empty,
+                    StatusText = !configured ? "Kurulu değil" : exists ? "Hazır" : "Yol geçersiz",
+                    StatusBrushKey = !configured ? "Brush.TextMuted" : exists ? "Brush.Success" : "Brush.Warning"
+                });
+            }
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                SetupRows.Clear();
+                foreach (var row in rows)
+                {
+                    SetupRows.Add(row);
+                }
+            });
+        }, "Kurulum durumu okunuyor...");
+    }
+
+    /// <summary>Emülatörün resmî indirme sayfasını tarayıcıda açar (ikili dosya dağıtmayız).</summary>
+    [RelayCommand]
+    private void OpenEmulatorDownload(string platformKey)
+        => _emulatorSetup.OpenOfficialPage(platformKey);
+
+    /// <summary>Bilinen konumlarda kurulu emülatörü arar ve kaydeder.</summary>
+    [RelayCommand]
+    private async Task AutoDetectEmulatorAsync(string platformKey)
+    {
+        if (!TryParsePlatform(platformKey, out var platform))
+        {
+            return;
+        }
+
+        var found = await Task.Run(() => _emulatorSetup.DetectExecutable(platformKey)).ConfigureAwait(false);
+
+        if (found is null)
+        {
+            Output = $"{platform}: bilinen konumlarda bulunamadı. 'İndir' ile resmî sayfayı açıp kurun, sonra 'Gözat' ile exe'yi seçin.";
+            return;
+        }
+
+        await SaveEmulatorPathAsync(platform, found).ConfigureAwait(false);
+        await RefreshSetupAsync().ConfigureAwait(false);
+        Output = $"{platform} emülatörü bulundu: {found}";
+    }
+
+    /// <summary>Kullanıcı kendi emülatör exe'sini seçer.</summary>
+    [RelayCommand]
+    private async Task BrowseEmulatorAsync(string platformKey)
+    {
+        if (!TryParsePlatform(platformKey, out var platform))
+        {
+            return;
+        }
+
+        var file = _dialogs.OpenFile($"{platform} emülatörünü seç", "Uygulama|*.exe|Tüm dosyalar|*.*");
+
+        if (string.IsNullOrWhiteSpace(file))
+        {
+            return;
+        }
+
+        await SaveEmulatorPathAsync(platform, file).ConfigureAwait(false);
+        await RefreshSetupAsync().ConfigureAwait(false);
+        Output = $"{platform} emülatörü kaydedildi: {file}";
+    }
+
+    [RelayCommand]
+    private void OpenGamesFolder()
+    {
+        EmulatorSetupService.EnsureGamesDirectory();
+        _shell.OpenFolder(EmulatorSetupService.GamesDirectory);
+    }
+
+    // ---------------------------------------------------------- yardımcılar
+
+    private static bool TryParsePlatform(string? key, out PlatformId platform)
+    {
+        platform = default;
+
+        return !string.IsNullOrWhiteSpace(key)
+               && Enum.TryParse(key, ignoreCase: true, out platform)
+               && platform is PlatformId.Ps1 or PlatformId.Ps2 or PlatformId.Ps3;
+    }
+
+    private async Task SaveEmulatorPathAsync(PlatformId platform, string exePath)
+    {
+        var configs = await _repository.GetEmulatorConfigsAsync(CancellationToken.None).ConfigureAwait(false);
+        var existing = configs.FirstOrDefault(c => c.PlatformId == platform);
+        var backend = _backends.Get(platform);
+
+        var config = new EmulatorConfig
+        {
+            Id = existing?.Id ?? Guid.NewGuid(),
+            PlatformId = platform,
+            Name = existing?.Name ?? backend?.DisplayName ?? platform.ToString(),
+            ExecutablePath = exePath,
+            WorkingDirectory = existing?.WorkingDirectory ?? Path.GetDirectoryName(exePath),
+            ArgumentTemplate = existing?.ArgumentTemplate ?? backend?.DefaultArgumentTemplate,
+            DefaultFullscreen = existing?.DefaultFullscreen ?? true,
+            ExtraArguments = existing?.ExtraArguments,
+            UpdatedAt = DateTimeOffset.Now
+        };
+
+        await _repository.UpsertEmulatorConfigAsync(config, CancellationToken.None).ConfigureAwait(false);
+    }
 }

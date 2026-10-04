@@ -21,6 +21,10 @@ public static class AppPaths
 
     public static string SettingsPath => Path.Combine(AppDataDirectory, "settings.json");
 
+    /// <summary>Kullanıcının kendi oyun klasörü: %USERPROFILE%\GameShelf\Games</summary>
+    public static string GamesDirectory { get; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "GameShelf", "Games");
+
     /// <summary>Ayarlardaki boş yolları varsayılanlarla doldurur ve klasörleri oluşturur.</summary>
     public static AppSettings EnsureDefaults(AppSettings settings)
     {
@@ -43,6 +47,7 @@ public static class AppPaths
         Directory.CreateDirectory(settings.MetadataPath);
         Directory.CreateDirectory(settings.PluginPath);
         Directory.CreateDirectory(LogDirectory);
+        Directory.CreateDirectory(GamesDirectory);
 
         return settings;
     }

@@ -2,6 +2,7 @@ using Dapper;
 using GameShelf.Application.Abstractions;
 using GameShelf.Domain.Enums;
 using GameShelf.Domain.Extensions;
+using GameShelf.Infrastructure.OS;
 using GameShelf.Infrastructure.Platform;
 using System.Data;
 
@@ -36,6 +37,7 @@ public sealed class DbInitializer
 
         await SeedPlatformsAsync(connection, cancellationToken).ConfigureAwait(false);
         await SeedEmulatorConfigsAsync(connection, cancellationToken).ConfigureAwait(false);
+        await SeedDefaultLibraryFolderAsync(connection, cancellationToken).ConfigureAwait(false);
         await SetMetaAsync(connection, "SchemaVersion", Schema.CurrentVersion.ToString(), cancellationToken)
             .ConfigureAwait(false);
 
@@ -98,6 +100,27 @@ public sealed class DbInitializer
                 UpdatedAt = DateTimeOffset.Now.ToString("O")
             }, cancellationToken: cancellationToken)).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Hiç kütüphane klasörü yoksa kullanıcının kendi oyun klasörünü ekler
+    /// (uygulama ilk açılışta boş görünmesin).
+    /// </summary>
+    private static async Task SeedDefaultLibraryFolderAsync(IDbConnection connection, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            INSERT INTO LibraryFolders (Id, Path, PlatformHint, Recursive, IsEnabled, LastScannedAt)
+            SELECT @Id, @Path, NULL, 1, 1, NULL
+            WHERE NOT EXISTS (SELECT 1 FROM LibraryFolders);
+            """;
+
+        Directory.CreateDirectory(AppPaths.GamesDirectory);
+
+        await connection.ExecuteAsync(new CommandDefinition(sql, new
+        {
+            Id = Guid.NewGuid().ToString(),
+            Path = AppPaths.GamesDirectory
+        }, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
     private static Task<int> SetMetaAsync(IDbConnection connection, string key, string value, CancellationToken cancellationToken)

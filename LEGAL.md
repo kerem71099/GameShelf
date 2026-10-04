@@ -32,6 +32,16 @@ bir özellik bu listedeki herhangi bir maddeyi ihlal ediyorsa **yazılmayacaktı
 - Plugin manifest'i (`plugin.json`) `declaresNoDrmBypass: true` alanı zorunludur; `false` veya eksikse plugin reddedilir.
 - Kod içinde "yasal uyarı" sabitleri: `Application/Resources/LegalTexts` (bkz. `docs/05-Plugin-Mimarisi.md`).
 
+## Emülatörler
+
+GameShelf, DuckStation / PCSX2 / RPCS3 gibi emülatörlerin **ikili dosyalarını dağıtmaz**:
+
+- Uygulama içindeki "İndir" düğmeleri yalnızca **resmî indirme sayfasını** açar.
+- `scripts/emulatorleri-indir.ps1` betiği yalnızca emülatör programının resmî
+  GitHub sürümünü indirir; oyun, BIOS, firmware veya anahtar indirmez.
+- Kullanıcı emülatörü ister `emulators\` klasörüne koyar (uygulama otomatik bulur),
+  ister elle yol gösterir.
+
 ## Kullanıcı sorumluluğu
 
 Kullanıcı, kütüphanesine eklediği dosyaların yasal sahipliğinden/kullanım hakkından sorumludur.

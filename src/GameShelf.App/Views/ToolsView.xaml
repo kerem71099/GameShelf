@@ -20,6 +20,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="Araçlar" Style="{StaticResource TextDisplay}" />
@@ -72,8 +73,75 @@
                 </StackPanel>
             </Border>
 
+            <!-- ============================================== kurulum -->
+            <Border Grid.Row="4" Style="{StaticResource Panel}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="KURULUM · EMÜLATÖRLER" Style="{StaticResource TextOverline}" />
+                    <TextBlock Text="{Binding SetupNote}" Style="{StaticResource TextMuted}" TextWrapping="Wrap"
+                               Margin="0,8,0,12" />
+
+                    <ItemsControl ItemsSource="{Binding SetupRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:EmulatorSetupRow}">
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="52" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding PlatformName}" Style="{StaticResource TextBodyStrong}"
+                                               VerticalAlignment="Center" />
+
+                                    <StackPanel Grid.Column="1" Margin="12,0,16,0">
+                                        <TextBlock Text="{Binding EmulatorName}" Style="{StaticResource TextBody}" />
+                                        <TextBlock Text="{Binding ExePath}" Style="{StaticResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Hint}" Style="{StaticResource TextCaption}"
+                                                   TextWrapping="Wrap" Margin="0,2,0,0" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource TextCaption}"
+                                                   VerticalAlignment="Center" Margin="0,0,12,0" />
+                                        <Button Content="Otomatik ara" Style="{StaticResource ButtonGhost}"
+                                                Command="{Binding DataContext.AutoDetectEmulatorCommand, ElementName=ToolsRoot}"
+                                                CommandParameter="{Binding PlatformKey}" />
+                                        <Button Content="Gözat" Margin="8,0,0,0" Style="{StaticResource ButtonGhost}"
+                                                Command="{Binding DataContext.BrowseEmulatorCommand, ElementName=ToolsRoot}"
+                                                CommandParameter="{Binding PlatformKey}" />
+                                        <Button Content="İndir" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
+                                                ToolTip="Emülatörün resmî indirme sayfasını tarayıcıda açar"
+                                                Command="{Binding DataContext.OpenEmulatorDownloadCommand, ElementName=ToolsRoot}"
+                                                CommandParameter="{Binding PlatformKey}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Border Padding="16" Margin="0,4,0,0" Style="{StaticResource Panel}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="OYUN KLASÖRÜM" Style="{StaticResource TextOverline}" />
+                                <TextBlock Text="{Binding GamesDirectory}" Style="{StaticResource TextMuted}"
+                                           TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="Klasörü aç" Style="{StaticResource ButtonSecondary}"
+                                    Command="{Binding OpenGamesFolderCommand}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- ============================================ kayıp + log -->
-            <Grid Grid.Row="4" Margin="0,16,0,0">
+            <Grid Grid.Row="5" Margin="0,16,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -127,7 +195,7 @@
                 </Border>
             </Grid>
 
-            <TextBlock Grid.Row="5" Text="{Binding Output}" Style="{StaticResource TextCaption}" Margin="0,12,0,0" />
+            <TextBlock Grid.Row="6" Text="{Binding Output}" Style="{StaticResource TextCaption}" Margin="0,12,0,0" />
         </Grid>
     </ScrollViewer>
 </UserControl>

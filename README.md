@@ -109,6 +109,7 @@ Ayrıntılı kurulum + sorun giderme: [`docs/08-Kendi-Bilgisayarinda-Calistirma.
 | [`docs/06-Yol-Haritasi-ve-Test-Plani.md`](docs/06-Yol-Haritasi-ve-Test-Plani.md) | MVP → v1 → v2, test planı |
 | [`docs/07-Adim-Adim-Rehber.md`](docs/07-Adim-Adim-Rehber.md) | **Sıfırdan, adım adım uygulama rehberi** |
 | [`docs/08-Kendi-Bilgisayarinda-Calistirma.md`](docs/08-Kendi-Bilgisayarinda-Calistirma.md) | **Kurulum, ilk çalıştırma, tek EXE, sorun giderme** |
+| [`docs/09-Kurulum-EXE-ve-Emulatorler.md`](docs/09-Kurulum-EXE-ve-Emulatorler.md) | **Tek EXE üretme, emülatör kurulumu, oyun klasörü** |
 
 ## Platform desteği
 

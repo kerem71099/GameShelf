@@ -125,6 +125,7 @@ public sealed partial class MainViewModel : ViewModelBase
         SelectedNav = NavItems.FirstOrDefault(n => n.Key == "tools");
         CurrentView = Tools;
         _ = Tools.LoadHistoryCommand.ExecuteAsync(null);
+        _ = Tools.RefreshSetupCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]
