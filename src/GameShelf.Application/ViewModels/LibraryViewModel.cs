@@ -411,4 +411,16 @@ public sealed partial class LibraryViewModel : ViewModelBase
         _settings.Current.LibraryViewMode = value;
         _ = _settings.SaveAsync();
     }
+
+    // ---------------------------------------------------------- oyun klasörü
+
+    public string GamesDirectory => EmulatorSetupService.GamesDirectory;
+
+    /// <summary>Kullanıcının kendi oyun klasörünü Explorer'da açar (yoksa oluşturur).</summary>
+    [RelayCommand]
+    private void OpenGamesFolder()
+    {
+        EmulatorSetupService.EnsureGamesDirectory();
+        _shell.OpenFolder(EmulatorSetupService.GamesDirectory);
+    }
 }

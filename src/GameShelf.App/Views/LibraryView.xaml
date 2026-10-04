@@ -109,6 +109,9 @@
                         Command="{Binding ToggleViewModeCommand}" />
                 <Button Content="Yeniden tara" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
                         Command="{Binding RescanCommand}" />
+                <Button Content="Oyun klasörünü aç" Margin="8,0,0,0" Style="{StaticResource ButtonGhost}"
+                        ToolTip="{Binding GamesDirectory}"
+                        Command="{Binding OpenGamesFolderCommand}" />
             </StackPanel>
         </Grid>
 

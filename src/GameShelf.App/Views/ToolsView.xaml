@@ -120,7 +120,11 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Border Padding="16" Margin="0,4,0,0" Style="{StaticResource Panel}">
+                    <Border Padding="16" Margin="0,4,0,0" Style="{StaticResource Panel}" Cursor="Hand"
+                            ToolTip="Çift tıkla: klasörü aç">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding OpenGamesFolderCommand}" />
+                        </Border.InputBindings>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -131,6 +135,8 @@
                                 <TextBlock Text="OYUN KLASÖRÜM" Style="{StaticResource TextOverline}" />
                                 <TextBlock Text="{Binding GamesDirectory}" Style="{StaticResource TextMuted}"
                                            TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+                                <TextBlock Text="Oyun dosyalarını buraya sürükleyip bırak, sonra Araçlar > Yeniden tara (F5)."
+                                           Style="{StaticResource TextCaption}" Margin="0,4,0,0" TextWrapping="Wrap" />
                             </StackPanel>
 
                             <Button Grid.Column="1" Content="Klasörü aç" Style="{StaticResource ButtonSecondary}"
