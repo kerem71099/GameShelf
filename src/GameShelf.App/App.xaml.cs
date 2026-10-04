@@ -18,7 +18,7 @@ namespace GameShelf.App;
 /// <summary>
 /// Composition root: DI kurulumu, veritabanı başlatma, tema, global exception handling.
 /// </summary>
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
 
@@ -94,11 +94,11 @@ public partial class App : Application
             Directory.CreateDirectory(AppPaths.LogDirectory);
             File.WriteAllText(logPath, ex.ToString());
 
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"GameShelf başlatılamadı:\n\n{ex.Message}\n\nAyrıntılar: {logPath}",
                 "GameShelf",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
 
             Shutdown(1);
         }
@@ -131,12 +131,12 @@ public partial class App : Application
     {
         LogSafe(exception);
 
-        MessageBox.Show(
+        System.Windows.MessageBox.Show(
             $"Beklenmeyen bir hata oluştu:\n\n{exception.Message}\n\n" +
             $"Ayrıntılar: {Path.Combine(AppPaths.LogDirectory, $"app-{DateTime.Now:yyyyMMdd}.log")}",
             "GameShelf",
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning);
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Warning);
     }
 
     private static void LogSafe(Exception exception)

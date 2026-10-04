@@ -22,7 +22,7 @@ public sealed class SqliteLibraryRepositoryTests : IDisposable
 
         var backends = new Domain.Interfaces.IEmulatorBackend[]
         {
-            new DuckStationBackend(), new Pcsx2Backend(), new Rpcsx3Placeholder()
+            new DuckStationBackend(), new Pcsx2Backend(), new Rpcs3Placeholder()
         };
 
         var factory = new EmulatorBackendFactory(backends, new NullLogger());

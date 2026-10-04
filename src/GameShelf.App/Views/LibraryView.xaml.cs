@@ -2,7 +2,7 @@ using System.Windows.Controls;
 
 namespace GameShelf.App.Views;
 
-public partial class LibraryView : UserControl
+public partial class LibraryView : System.Windows.Controls.UserControl
 {
     public LibraryView()
     {

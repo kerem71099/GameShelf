@@ -19,4 +19,9 @@
     <ProjectReference Include="..\..\src\GameShelf.Infrastructure\GameShelf.Infrastructure.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Test adlarindaki alt cizgi (CA1707), arayuz tipi kullanimi (CA1859) ve xUnit2013
+         bu projede kasitlidir; log okunur kalsin diye kapatildi. -->
+    <NoWarn>$(NoWarn);CA1707;CA1859;xUnit2013;xUnit1013</NoWarn>
+  </PropertyGroup>
 </Project>
