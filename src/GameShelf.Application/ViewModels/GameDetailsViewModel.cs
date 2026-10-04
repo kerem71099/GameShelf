@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -106,7 +107,7 @@ public sealed partial class GameDetailsViewModel : ViewModelBase
 
     public string LastPlayedText => _game.LastPlayedAt is null
         ? "Hiç oynanmadı"
-        : _game.LastPlayedAt.Value.LocalDateTime.ToString("dd.MM.yyyy HH:mm");
+        : _game.LastPlayedAt.Value.LocalDateTime.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture);
 
     public void Load(Game game)
     {

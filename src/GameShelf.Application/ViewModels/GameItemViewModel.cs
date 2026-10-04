@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using GameShelf.Application.Abstractions;
 using GameShelf.Application.Services;
@@ -122,7 +123,7 @@ public sealed partial class GameItemViewModel : ViewModelBase
 
     public string LastPlayedText => _game.LastPlayedAt is null
         ? "Hiç oynanmadı"
-        : _game.LastPlayedAt.Value.LocalDateTime.ToString("dd.MM.yyyy HH:mm");
+        : _game.LastPlayedAt.Value.LocalDateTime.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture);
 
     public string SizeText => _game.FileSizeBytes <= 0
         ? string.Empty

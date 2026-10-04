@@ -16,7 +16,8 @@ public sealed class PlatformDetector : IPlatformDetector
     private const int IsoScanLimit = 4 * 1024 * 1024; // ISO içi marker taraması için ilk 4 MB
     private const int BufferSize = 1024 * 1024;
     private const long Ps2SizeThreshold = 700L * 1024 * 1024;   // PS1 CD'leri ~700 MB altindadir
-    private const long Ps3SizeThreshold = 4L * 1024 * 1024 * 1024; // Blu-ray
+    // PS2 DVD-9 imajlari ~8.1 GB' a kadar cikabilir; PS3 Blu-ray oyunlari bundan buyuktur.
+    private const long Ps3SizeThreshold = 9L * 1024 * 1024 * 1024;
 
     public IReadOnlyList<string> KnownExtensions => PlatformCatalog.AllExtensions;
 

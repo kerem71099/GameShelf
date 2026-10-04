@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -98,8 +99,10 @@ public sealed partial class DownloadsViewModel : ViewModelBase
         row.Progress = 0;
         row.StatusText = "İndiriliyor...";
 
-        var target = row.Item.PlatformKey is { } key
-            ? EmulatorSetupService.EmulatorDirectoryFor(key)
+        var key = row.Item.PlatformKey;
+
+        var target = key is { } platformKey
+            ? EmulatorSetupService.EmulatorDirectoryFor(platformKey)
             : Path.Combine(DownloadService.DownloadRoot, row.Item.Id);
 
         var progress = new Progress<double>(value => _ = Dispatcher.InvokeAsync(() =>
@@ -165,20 +168,16 @@ public sealed partial class DownloadsViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Kalemin resmî sayfasını tarayıcıda açar (emülatör veya araç).</summary>
     [RelayCommand]
     private void OpenPage(DownloadRow? row)
     {
-        if (row is null)
+        if (row is null || string.IsNullOrWhiteSpace(row.Item.PageUrl))
         {
             return;
         }
 
-        _setup.OpenOfficialPage(row.Item.PlatformKey ?? string.Empty);
-
-        if (string.IsNullOrEmpty(row.Item.PlatformKey))
-        {
-            Process.Start(new System.Diagnostics.ProcessStartInfo(row.Item.PageUrl) { UseShellExecute = true });
-        }
+        Process.Start(new ProcessStartInfo(row.Item.PageUrl) { UseShellExecute = true });
     }
 
     [RelayCommand]
