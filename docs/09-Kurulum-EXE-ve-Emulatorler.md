@@ -68,6 +68,21 @@ Uygulama açılırken bu klasöre bakar: `Araçlar → KURULUM → **Otomatik ar
 emülatörü bulur ve yolu kaydeder. Böylece "uygulamayla birlikte gelmiş" gibi olur;
 tek yapman gereken klasörü EXE ile birlikte taşımak.
 
+### Uygulama içinden (önerilen): İndirmeler sekmesi
+
+Sol gezinmede **İndirmeler** sekmesi var. Her kalem için "**İndir ve kur**":
+
+| Kalem | Kategori | Not |
+|---|---|---|
+| DuckStation (PS1) | Emülatör | zip, uygulama kendisi açar |
+| PCSX2 (PS2) | Emülatör | 7z — 7-Zip gerekir |
+| RPCS3 (PS3) | Emülatör | 7z — 7-Zip gerekir |
+| 7-Zip | Araç | `.7z` dosyalarını açmak için; listeden indirilip kurulur |
+| .NET 8 Desktop Runtime | Araç | Yalnızca framework-dependent EXE için |
+
+İndirilenler `%LOCALAPPDATA%\GameShelf\emulators\<PS1|PS2|PS3>` klasörüne açılır ve
+emülatör yolu otomatik kaydedilir. Betik/komut satırı gerekmez.
+
 ### Hazır indirme betiği
 
 ```powershell

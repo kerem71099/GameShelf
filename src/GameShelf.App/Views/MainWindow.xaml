@@ -90,6 +90,9 @@
                 <DataTemplate DataType="{x:Type vm:ToolsViewModel}">
                     <views:ToolsView />
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:DownloadsViewModel}">
+                    <views:DownloadsView />
+                </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>
     </Grid>

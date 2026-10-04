@@ -18,6 +18,7 @@ public sealed partial class MainViewModel : ViewModelBase
         GameDetailsViewModel details,
         SettingsViewModel settingsView,
         ToolsViewModel tools,
+        DownloadsViewModel downloads,
         ISettingsService settings,
         ILoggingService logger,
         IDispatcher dispatcher)
@@ -27,13 +28,15 @@ public sealed partial class MainViewModel : ViewModelBase
         Details = details;
         SettingsView = settingsView;
         Tools = tools;
+        Downloads = downloads;
         _settings = settings;
 
         NavItems =
         [
             new NavItem("library", "Kütüphane", "▦"),
             new NavItem("settings", "Ayarlar", "⚙"),
-            new NavItem("tools", "Araçlar", "🛠")
+            new NavItem("tools", "Araçlar", "🛠"),
+            new NavItem("downloads", "İndirmeler", "↓")
         ];
 
         Library.DetailsRequested += (_, game) => ShowGameDetails(game);
@@ -48,6 +51,8 @@ public sealed partial class MainViewModel : ViewModelBase
     public SettingsViewModel SettingsView { get; }
 
     public ToolsViewModel Tools { get; }
+
+    public DownloadsViewModel Downloads { get; }
 
     public ObservableCollection<NavItem> NavItems { get; }
 
@@ -97,6 +102,9 @@ public sealed partial class MainViewModel : ViewModelBase
             case "tools":
                 ShowTools();
                 break;
+            case "downloads":
+                ShowDownloads();
+                break;
             default:
                 ShowLibrary();
                 break;
@@ -126,6 +134,14 @@ public sealed partial class MainViewModel : ViewModelBase
         CurrentView = Tools;
         _ = Tools.LoadHistoryCommand.ExecuteAsync(null);
         _ = Tools.RefreshSetupCommand.ExecuteAsync(null);
+    }
+
+    [RelayCommand]
+    private void ShowDownloads()
+    {
+        SelectedNav = NavItems.FirstOrDefault(n => n.Key == "downloads");
+        CurrentView = Downloads;
+        _ = Downloads.RefreshCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]

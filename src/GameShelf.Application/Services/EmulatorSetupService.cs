@@ -1,5 +1,9 @@
 using System.Diagnostics;
+using GameShelf.Application.Abstractions;
 using GameShelf.Application.Models;
+using GameShelf.Domain.Entities;
+using GameShelf.Domain.Enums;
+using GameShelf.Domain.Interfaces;
 
 namespace GameShelf.Application.Services;
 
@@ -11,6 +15,15 @@ namespace GameShelf.Application.Services;
 /// </summary>
 public sealed class EmulatorSetupService
 {
+    private readonly IEmulatorBackendFactory _backends;
+    private readonly ILibraryRepository _repository;
+
+    public EmulatorSetupService(IEmulatorBackendFactory backends, ILibraryRepository repository)
+    {
+        _backends = backends;
+        _repository = repository;
+    }
+
     public const string Notice =
         "Emülatörler GameShelf ile birlikte gelmez (ayrı GPL projeleridir ve sık güncellenir); " +
         "'İndir' düğmesi yalnızca resmî indirme sayfasını açar. " +
@@ -23,6 +36,16 @@ public sealed class EmulatorSetupService
 
     /// <summary>Tek EXE'nin yanındaki emülatör klasörü (taşınabilir kurulum).</summary>
     public static string BundledEmulatorDirectory => Path.Combine(AppContext.BaseDirectory, "emulators");
+
+    /// <summary>
+    /// İndirme Merkezi'nin hedefi: %LOCALAPPDATA%\GameShelf\emulators
+    /// (kaynaktan mı EXE'den mi çalıştığından bağımsız, sabit bir yer).
+    /// </summary>
+    public static string EmulatorRoot { get; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameShelf", "emulators");
+
+    /// <summary>Bir platformun indirme/hedef klasörü.</summary>
+    public static string EmulatorDirectoryFor(string platformKey) => Path.Combine(EmulatorRoot, platformKey);
 
     public IReadOnlyList<EmulatorDownloadInfo> Downloads { get; } = new[]
     {
@@ -135,8 +158,38 @@ public sealed class EmulatorSetupService
         }
     }
 
+    /// <summary>Bulunan/kurulan emülatör yolunu veritabanına yazar (platforma özel tek kayıt).</summary>
+    public async Task SaveExecutablePathAsync(string platformKey, string exePath, CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse(platformKey, ignoreCase: true, out PlatformId platform))
+        {
+            return;
+        }
+
+        var configs = await _repository.GetEmulatorConfigsAsync(cancellationToken).ConfigureAwait(false);
+        var existing = configs.FirstOrDefault(c => c.PlatformId == platform);
+        var backend = _backends.Get(platform);
+
+        var config = new EmulatorConfig
+        {
+            Id = existing?.Id ?? Guid.NewGuid(),
+            PlatformId = platform,
+            Name = existing?.Name ?? backend?.DisplayName ?? platform.ToString(),
+            ExecutablePath = exePath,
+            WorkingDirectory = existing?.WorkingDirectory ?? Path.GetDirectoryName(exePath),
+            ArgumentTemplate = existing?.ArgumentTemplate ?? backend?.DefaultArgumentTemplate,
+            DefaultFullscreen = existing?.DefaultFullscreen ?? true,
+            ExtraArguments = existing?.ExtraArguments,
+            UpdatedAt = DateTimeOffset.Now
+        };
+
+        await _repository.UpsertEmulatorConfigAsync(config, cancellationToken).ConfigureAwait(false);
+    }
+
     private static IEnumerable<string> CandidateDirectories(string platformKey)
     {
+        yield return EmulatorRoot;
+        yield return Path.Combine(EmulatorRoot, platformKey);
         yield return BundledEmulatorDirectory;
         yield return Path.Combine(BundledEmulatorDirectory, platformKey);
         yield return AppContext.BaseDirectory;
