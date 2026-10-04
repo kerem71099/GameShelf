@@ -43,6 +43,13 @@ public static class BuildStamp
             location = Path.Combine(AppContext.BaseDirectory, "GameShelf.Application.dll");
         }
 
+        if (!File.Exists(location))
+        {
+            // self-contained tek EXE: yan yana dll yoktur, ana EXE'nin zamanını kullan
+            location = Directory.EnumerateFiles(AppContext.BaseDirectory, "*.exe")
+                .FirstOrDefault() ?? location;
+        }
+
         return File.Exists(location)
             ? File.GetLastWriteTime(location).ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture)
             : "—";

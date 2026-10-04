@@ -11,22 +11,28 @@ Bu belge üç soruyu yanıtlar:
 ## 1) Tek EXE üretmek
 
 ```bat
-scripts\publish-exe.bat
+scripts\publish-exe.bat           :: self-contained (önerilen)
+scripts\publish-exe.bat small     :: framework-dependent
 ```
 
-Seçenekler:
+Soru sormaz; ilk çalıştırmada birkaç dakika sürer (Windows runtime paketleri iner).
 
-| Seçim | Boyut | Gereksinim |
+| Komut | Boyut | Gereksinim |
 |---|---|---|
-| **1) Self-contained** (önerilen) | ~70 MB | Hiçbir şey gerekmez; temiz bir Windows 10/11 PC'de çalışır |
-| 2) Framework-dependent | ~10 MB | Hedef PC'de .NET 8 **Desktop Runtime** kurulu olmalı |
+| `publish-exe.bat` (önerilen) | ~70 MB | Hiçbir şey gerekmez; temiz bir Windows 10/11 PC'de çalışır |
+| `publish-exe.bat small` | ~10 MB | Hedef PC'de .NET 8 **Desktop Runtime** kurulu olmalı |
 
 Çıktı:
 
 ```
-dist\GameShelf.exe
-dist\emulators\        <- emülatörleri buraya koyabilirsin (opsiyonel)
+dist\GameShelf.exe           <- çift tıkla, çalışır
+dist\emulators\PS1|PS2|PS3   <- emülatörleri buraya koyabilirsin (opsiyonel)
+dist\KURULUM-BILGI.txt       <- kısa başlangıç notu
 ```
+
+> **Veri klasörü aynı:** EXE de `dotnet run` gibi `%LOCALAPPDATA%\GameShelf` kullanır.
+> Yani EXE ile açtığında kütüphanen, emülatör yolların ve BIOS ayarların aynen gelir —
+> sıfırdan kurulum gerekmez.
 
 > **Test:** EXE'yi mutlaka `dist\` dışındaki boş bir klasöre kopyalayıp oradan çalıştır.
 > SQLite native kütüphanesi (`e_sqlite3.dll`) tek dosyadan kendini açar; ilk açılış 1-2 saniye sürebilir.
