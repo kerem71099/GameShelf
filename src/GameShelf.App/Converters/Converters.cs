@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -40,7 +47,7 @@ public sealed class StringNotNullOrEmptyToVisibilityConverter : IValueConverter
         => string.IsNullOrWhiteSpace(value as string) ? Visibility.Collapsed : Visibility.Visible;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => Binding.DoNothing;
+        => System.Windows.Data.Binding.DoNothing;
 }
 
 /// <summary>Platform adını tema fırçasına çevirir (PS1/PS2/PS3 chip renkleri).</summary>
@@ -58,13 +65,13 @@ public sealed class PlatformToBrushConverter : IValueConverter
             _ => "Brush.PlatformUnknown"
         };
 
-        return System.Windows.Application.Current.TryFindResource(key) as Brush
-               ?? System.Windows.Application.Current.TryFindResource("Brush.TextMuted") as Brush
-               ?? Brushes.Gray;
+        return System.Windows.Application.Current.TryFindResource(key) as System.Windows.Media.Brush
+               ?? System.Windows.Application.Current.TryFindResource("Brush.TextMuted") as System.Windows.Media.Brush
+               ?? System.Windows.Media.Brushes.Gray;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => Binding.DoNothing;
+        => System.Windows.Data.Binding.DoNothing;
 }
 
 /// <summary>Dosya boyutunu (byte) okunur metne çevirir.</summary>
@@ -86,5 +93,5 @@ public sealed class BytesToTextConverter : IValueConverter
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => Binding.DoNothing;
+        => System.Windows.Data.Binding.DoNothing;
 }

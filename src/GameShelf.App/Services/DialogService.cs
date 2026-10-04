@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 using GameShelf.Application.Abstractions;
 
 namespace GameShelf.App.Services;
@@ -20,7 +27,7 @@ public sealed class DialogService : IDialogService
 
         if (!string.IsNullOrWhiteSpace(initialDirectory) && Directory.Exists(initialDirectory))
         {
-            dialog.InitialDirectory = initialDirectory;
+            dialog.InitialDirectory = initialDirectory!;
         }
 
         return dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK ? dialog.FileName : null;
@@ -37,7 +44,7 @@ public sealed class DialogService : IDialogService
 
         if (!string.IsNullOrWhiteSpace(initialDirectory) && Directory.Exists(initialDirectory))
         {
-            dialog.InitialDirectory = initialDirectory;
+            dialog.InitialDirectory = initialDirectory!;
         }
 
         return dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK ? dialog.SelectedPath : null;
