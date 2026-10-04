@@ -9,7 +9,11 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- InvariantGlobalization KAPALI: .NET 8'de invariant mod, 'en-us' gibi kulturler
+         istendiginde calisma aninda CultureNotFoundException firlatiyor (SQLite ve WPF
+         kaynak aramasi en-us istiyor). Tarafimizdan yapilan bicimlendirmeler zaten
+         CultureInfo.InvariantCulture kullaniyor (RowMappers.Iso, TitleCleaner). -->
+    <InvariantGlobalization>false</InvariantGlobalization>
     <!-- CA1051: ViewModelBase'te protected alan (Logger/Dispatcher) kasıtlı
          CA1716: IEmulatorBackendFactory.Get / ILoggingService.Error adları okunabilirlik için seçildi
          CA1001: CancellationTokenSource alanları ViewModel yaşam döngüsünde kasıtlı
