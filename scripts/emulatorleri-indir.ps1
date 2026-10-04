@@ -123,7 +123,7 @@ Write-Host "============================================================" -Foreg
 Write-Host ""
 Write-Host " Sonraki adimlar:"
 Write-Host "  1) GameShelf > Araclar > KURULUM > 'Otomatik ara' (PS1 / PS2 / PS3)"
-Write-Host "     Uygulama su klasorlere bakar: EXE'nin yanindaki emulators\ ve"
+Write-Host "     Uygulama su klasorlere bakar: EXE klasorundeki emulators\ ve"
 Write-Host "     ust klasorlerdeki emulators\ (kaynaktan calistirirken depo koku)."
 Write-Host "  2) Oyun klasoru: $env:USERPROFILE\GameShelf\Games"
 Write-Host "  3) BIOS/firmware ve oyun dosyalarini KENDI yasal yedeklerinizden saglayin."
