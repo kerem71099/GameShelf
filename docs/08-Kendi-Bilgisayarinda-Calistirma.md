@@ -1,7 +1,12 @@
 # 08 — Kendi Bilgisayarında Çalıştırma (Windows 10/11)
 
 Bu dosya, GameShelf'i kendi PC'nde **ilk kez** ayağa kaldırmak için gereken adımları anlatır.
-Tahmini süre: **15–20 dakika** (indirmeler hariç).
+Tahmini süre: **5–10 dakika** (indirmeler hariç).
+
+> ⚠️ **En sık yapılan hata:** komut satırının başında `PS C:\WINDOWS\system32>` yazıyorsa
+> yanlış klasördesin demektir. `PS C:\Users\<sen>\...\GameShelf>` gibi **proje klasörünü**
+> görmelisin. PowerShell'i proje klasöründe açmak için: klasörü Explorer'da aç → adres
+> çubuğuna `powershell` yaz → Enter.
 
 ---
 
@@ -25,7 +30,23 @@ git --version
 
 ## 2. Kodu al
 
-### A) Git ile (önerilen)
+### A) Git **yoksa** → ZIP ile indir (en kolay, önerilen)
+
+1. Şu adresi tarayıcıya yapıştır ve indir:
+   ```
+   https://github.com/kerem71099/GameShelf/archive/refs/heads/arena/01a107bc-gameshelf.zip
+   ```
+2. İnen ZIP'e **sağ tık → Tümünü ayıkla** (masaüstü iyidir).
+   Klasör adı şuna benzer: `GameShelf-arena-01a107bc-gameshelf`
+3. Klasörü aç; içinde `GameShelf.sln` ve `scripts` klasörünü görmelisin.
+4. **PowerShell'i bu klasörde aç:** Explorer adres çubuğuna `powershell` yaz → Enter.
+   (Veya klasörde boş bir yere **Shift + sağ tık → "PowerShell penceresini burada aç"**.)
+
+### B) Git kurmak istersen (opsiyonel)
+
+1. <https://git-scm.com/download/win> → indir → kur
+   (kurulumda **“Git from the command line and also from 3rd-party software”** seçeneğini seç)
+2. Kurulumdan sonra **yeni** bir PowerShell aç:
 
 ```powershell
 git clone https://github.com/kerem71099/GameShelf.git
@@ -33,21 +54,16 @@ cd GameShelf
 git checkout arena/01a107bc-gameshelf
 ```
 
-### B) Git kullanmadan
-
-1. GitHub’da branch `arena/01a107bc-gameshelf` → **Code → Download ZIP**
-2. ZIP’i bir klasöre aç (örn. `C:\Users\<sen>\Projects\GameShelf`)
-3. O klasörde PowerShell’i aç
-
-> Kısa yol: `scripts\` klasöründeki `.bat` dosyalarına çift tıklayabilirsin.
-
----
+> ZIP ile indirdiysen `git pull` çalışmaz (Git yok). Güncelleme için ya Git kur,
+> ya ZIP'i yeniden indir.
 
 ## 3. Çalıştır — 3 farklı yol
 
 ### Yol 1: Tek tıkla `.bat` (en kolay)
 
-`scripts\run.bat` dosyasına **çift tıkla**.
+Proje klasöründe `scripts` klasörünü aç → **`run.bat` dosyasına çift tıkla**.
+(Çalıştırdığın yer `C:\WINDOWS\system32` ise `scripts\run.bat` yazmak işe yaramaz —
+klasöre gidip çift tıklamak en güvenlisi.)
 Sırayla `restore → build → run` yapar ve pencere açılır.
 Hata olursa pencere kapanmaz, mesajı görebilirsin.
 
@@ -175,6 +191,10 @@ Veya ortam bilgini görmek için: `scripts\doctor.bat` → çıktısını payla�
 
 | Belirti | Çözüm |
 |---|---|
+| `git : The term 'git' is not recognized` | Git kurulu değil → ya ZIP ile indir (§2-A), ya Git kur (§2-B) |
+| `cd : Cannot find path '...\GameShelf'` | Repo o klasörde değil → önce §2 ile kodu indir, sonra o klasöre `cd` yap |
+| `MSB1009: Proje dosyası yok` / `MSBUILD : error MSB1009` | Yanlış klasördesin → `GameShelf.sln` olan klasöre git |
+| `scripts\build-log.bat : The module 'scripts' could not be loaded` | PowerShell `.bat` dosyalarını böyle çalıştırmaz → proje klasöründe `scripts\run.bat` **çift tıkla**, ya da `cmd` / `powershell -File .\scripts\build-log.bat` kullan |
 | `'dotnet' is not recognized` | .NET 8 SDK kurulu değil → yükle, **yeni** bir PowerShell aç |
 | `NETSDK1100: Windows is required` | WPF yalnızca Windows’ta derlenir (Linux/WSL değil) |
 | `DllNotFoundException: e_sqlite3` | `publish` sonrası EXE’yi başka klasörde denedin mi? `IncludeNativeLibrariesForSelfExtract` açık olmalı (csproj’da açık) |
