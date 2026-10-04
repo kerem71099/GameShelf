@@ -332,7 +332,7 @@ public sealed class SqliteLibraryRepository : ILibraryRepository
         await connection.ExecuteAsync(new CommandDefinition(sql, new
         {
             GameId = gameOverride.GameId.ToString(),
-            Fullscreen = gameOverride.Fullscreen is null ? null : (gameOverride.Fullscreen.Value ? 1 : 0),
+            Fullscreen = gameOverride.Fullscreen is null ? (int?)null : (gameOverride.Fullscreen.Value ? 1 : 0),
             gameOverride.ExtraArguments,
             gameOverride.ArgumentTemplate,
             EmulatorConfigId = gameOverride.EmulatorConfigId?.ToString(),

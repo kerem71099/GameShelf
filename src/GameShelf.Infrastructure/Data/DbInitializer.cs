@@ -100,7 +100,7 @@ public sealed class DbInitializer
         }
     }
 
-    private static Task SetMetaAsync(IDbConnection connection, string key, string value, CancellationToken cancellationToken)
+    private static Task<int> SetMetaAsync(IDbConnection connection, string key, string value, CancellationToken cancellationToken)
         => connection.ExecuteAsync(new CommandDefinition(
             """
             INSERT INTO SchemaMeta (Key, Value) VALUES (@Key, @Value)
