@@ -107,12 +107,20 @@ Sol gezinmede **İndirmeler** sekmesi var. Her kalem için "**İndir ve kur**":
 |---|---|---|
 | DuckStation (PS1) | Emülatör | zip, uygulama kendisi açar |
 | PCSX2 (PS2) | Emülatör | 7z — 7-Zip gerekir |
-| RPCS3 (PS3) | Emülatör | 7z — 7-Zip gerekir |
+| RPCS3 (PS3) | Emülatör | 7z — 7-Zip gerekir. Derlemeler `RPCS3/rpcs3-binaries-win` deposunda yayınlanır (ana repodaki sürümlerde dosya yok) |
 | 7-Zip | Araç | `.7z` dosyalarını açmak için; listeden indirilip kurulur |
 | .NET 8 Desktop Runtime | Araç | Yalnızca framework-dependent EXE için |
 
 İndirilenler `%LOCALAPPDATA%\GameShelf\emulators\<PS1|PS2|PS3>` klasörüne açılır ve
 emülatör yolu otomatik kaydedilir. Betik/komut satırı gerekmez.
+
+- **RPCS3 neden ayrı bir depodan gelir?** RPCS3 sürekli güncellenen (rolling release) bir
+  projedir; GitHub'daki ana sürümde hiç dosya yayınlanmaz, Windows derlemeleri
+  `RPCS3/rpcs3-binaries-win` deposunda tutulur. İndirme Merkezi doğrudan oraya bakar.
+- **PS3 firmware (iyi haber):** PS1/PS2'nin aksine PS3'te konsoldan dump gerekmez.
+  Sony'nin resmî PS3 sistem yazılımı sayfasından `PS3UPDAT.PUP` indirilir, RPCS3'te
+  `File → Install Firmware` ile kurulur — resmî ve ücretsizdir.
+  Uygulamada: `Araçlar → BIOS → "PS3 firmware (Sony - resmî)"` düğmesi bu sayfayı açar.
 
 ### Hazır indirme betiği
 

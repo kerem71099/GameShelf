@@ -119,6 +119,11 @@ public sealed partial class ToolsViewModel : ViewModelBase
     private void OpenBiosGuide()
         => _shell.OpenUrl(BiosGuide.OfficialGuideUrl);
 
+    /// <summary>PS3 firmware'i: Sony'nin resmî sayfası (dump gerekmez, yasal ve ücretsiz).</summary>
+    [RelayCommand]
+    private void OpenPs3Firmware()
+        => _shell.OpenUrl(BiosGuide.Ps3FirmwareUrl);
+
     public string LogDirectory => _settings.Current.LogDirectory;
 
     [ObservableProperty] private string _output = string.Empty;

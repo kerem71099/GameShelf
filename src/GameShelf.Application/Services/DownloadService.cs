@@ -34,22 +34,26 @@ public sealed class DownloadService : IDisposable
             "duckstation", "Emülatör", "DuckStation — PS1",
             "Resmî sürüm (stenzek/duckstation). cue/bin, chd, iso, pbp açar.",
             DownloadKind.Extract, "Ps1", "stenzek", "duckstation",
-            @"windows-x64-release\.zip$", @"windows.*x64.*\.(zip|7z)$", null,
+            @"^(?!.*symbols).*windows-x64-release\.zip$",
+            @"^(?!.*symbols).*windows.*x64.*\.(zip|7z)$", null,
             "https://github.com/stenzek/duckstation/releases/latest"),
 
         new DownloadCatalogItem(
             "pcsx2", "Emülatör", "PCSX2 — PS2",
             "Resmî sürüm (PCSX2/pcsx2). iso ve chd açar. .7z için 7-Zip gerekir.",
             DownloadKind.Extract, "Ps2", "PCSX2", "pcsx2",
-            @"windows.*(x64|64bit).*\.(zip|7z)$", @"windows.*\.(zip|7z)$", null,
+            @"^(?!.*symbols).*windows.*(x64|64bit).*\.(zip|7z)$",
+            @"^(?!.*symbols).*windows.*\.(zip|7z)$", null,
             "https://github.com/PCSX2/pcsx2/releases/latest"),
 
         new DownloadCatalogItem(
             "rpcs3", "Emülatör", "RPCS3 — PS3",
-            "Resmî sürüm (RPCS3/rpcs3). Klasör yapısı ve iso açar. .7z için 7-Zip gerekir.",
-            DownloadKind.Extract, "Ps3", "RPCS3", "rpcs3",
-            @"win64.*\.(zip|7z)$", @"windows.*\.(zip|7z)$", null,
-            "https://github.com/RPCS3/rpcs3/releases/latest"),
+            "Resmî Windows derlemesi (RPCS3/rpcs3-binaries-win). RPCS3 sürekli güncellenen bir " +
+            "proje olduğu için ana repodaki sürümlerde dosya bulunmaz; derlemeler bu depoda yayınlanır. " +
+            "Klasör yapısı ve iso açar. .7z için 7-Zip gerekir.",
+            DownloadKind.Extract, "Ps3", "RPCS3", "rpcs3-binaries-win",
+            @"^(?!.*symbols).*win64.*\.(zip|7z)$", @"^(?!.*symbols).*win(64|dows).*\.(zip|7z)$", null,
+            "https://rpcs3.net/download"),
 
         new DownloadCatalogItem(
             "7zip", "Araç", "7-Zip (arşiv açıcı)",
@@ -181,25 +185,74 @@ public sealed class DownloadService : IDisposable
 
     private async Task<string> ResolveGitHubAssetAsync(DownloadCatalogItem item, CancellationToken cancellationToken)
     {
-        var json = await _http
-            .GetStringAsync($"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases/latest", cancellationToken)
+        if (string.IsNullOrWhiteSpace(item.Owner) || string.IsNullOrWhiteSpace(item.Repo))
+        {
+            throw new InvalidOperationException("Bu kalem için indirme kaynağı tanımlı değil.");
+        }
+
+        // 1) En son sürüm
+        var latest = await TryFindAssetAsync(
+                $"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases/latest",
+                item,
+                cancellationToken)
             .ConfigureAwait(false);
+
+        if (latest is not null)
+        {
+            return latest;
+        }
+
+        // 2) Son 10 sürüm: kimi projeler (örn. RPCS3) en son sürümde dosya yayınlamaz.
+        var listJson = await _http
+            .GetStringAsync($"https://api.github.com/repos/{item.Owner}/{item.Repo}/releases?per_page=10", cancellationToken)
+            .ConfigureAwait(false);
+
+        using var list = JsonDocument.Parse(listJson);
+
+        foreach (var release in list.RootElement.EnumerateArray())
+        {
+            if (release.ValueKind == JsonValueKind.Object
+                && release.TryGetProperty("assets", out var assets)
+                && MatchAsset(assets, item) is { } url)
+            {
+                return url;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Bu sürümde uygun Windows dosyası bulunamadı ({item.Owner}/{item.Repo}). " +
+            $"Resmî sayfadan elle indirebilirsin: {item.PageUrl ?? "-"}");
+    }
+
+    /// <summary>Tek bir sürümün dosyalarına bakar; uyan dosya yoksa null.</summary>
+    private async Task<string?> TryFindAssetAsync(string url, DownloadCatalogItem item, CancellationToken cancellationToken)
+    {
+        var json = await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
 
         using var document = JsonDocument.Parse(json);
 
-        if (!document.RootElement.TryGetProperty("assets", out var assets))
-        {
-            throw new InvalidOperationException("Sürümde indirilebilir dosya bulunamadı.");
-        }
+        return document.RootElement.TryGetProperty("assets", out var assets)
+            ? MatchAsset(assets, item)
+            : null;
+    }
 
+    /// <summary>Sürümdeki dosyalar arasından Windows'a uyanı seçer (sembol/şema dosyaları hariç).</summary>
+    private static string? MatchAsset(JsonElement assets, DownloadCatalogItem item)
+    {
         string? fallback = null;
 
         foreach (var asset in assets.EnumerateArray())
         {
-            var name = asset.GetProperty("name").GetString() ?? string.Empty;
-            var url = asset.GetProperty("browser_download_url").GetString();
+            if (!asset.TryGetProperty("name", out var nameElement)
+                || !asset.TryGetProperty("browser_download_url", out var urlElement))
+            {
+                continue;
+            }
 
-            if (url is null)
+            var name = nameElement.GetString() ?? string.Empty;
+            var url = urlElement.GetString();
+
+            if (string.IsNullOrWhiteSpace(url) || url.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
@@ -209,13 +262,15 @@ public sealed class DownloadService : IDisposable
                 return url;
             }
 
-            if (fallback is null && item.AssetFallback is { } pattern && Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase))
+            if (fallback is null
+                && item.AssetFallback is { } pattern
+                && Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase))
             {
                 fallback = url;
             }
         }
 
-        return fallback ?? throw new InvalidOperationException("Bu sürümde uygun Windows dosyası yok.");
+        return fallback;
     }
 
     private async Task DownloadFileAsync(string url, string destination, IProgress<double>? progress, CancellationToken cancellationToken)
