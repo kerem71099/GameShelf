@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GameShelf.Application.Abstractions;
+using GameShelf.Application.Services;
 using GameShelf.Domain.Entities;
 
 namespace GameShelf.Application.ViewModels;
@@ -12,6 +13,7 @@ public sealed record NavItem(string Key, string Label, string Glyph);
 public sealed partial class MainViewModel : ViewModelBase
 {
     private readonly ISettingsService _settings;
+    private readonly EmulatorAutoSetupService _autoSetup;
 
     public MainViewModel(
         LibraryViewModel library,
@@ -20,6 +22,7 @@ public sealed partial class MainViewModel : ViewModelBase
         ToolsViewModel tools,
         DownloadsViewModel downloads,
         ISettingsService settings,
+        EmulatorAutoSetupService autoSetup,
         ILoggingService logger,
         IDispatcher dispatcher)
         : base(logger, dispatcher)
@@ -30,6 +33,7 @@ public sealed partial class MainViewModel : ViewModelBase
         Tools = tools;
         Downloads = downloads;
         _settings = settings;
+        _autoSetup = autoSetup;
 
         NavItems =
         [
@@ -76,11 +80,43 @@ public sealed partial class MainViewModel : ViewModelBase
     /// </summary>
     public async Task InitializeAsync()
     {
+        Logger.Info(nameof(MainViewModel), $"GameShelf {BuildStamp.Display} açılıyor.");
+
         SelectedNav ??= NavItems.FirstOrDefault(n => n.Key == "library");
 
         if (CurrentView is null)
         {
             await ShowLibraryInternalAsync().ConfigureAwait(false);
+        }
+
+        // Kullanıcı uğraşmasın: emülatör ve BIOS yollarını arka planda kendimiz buluruz.
+        _ = RunAutoSetupAsync();
+    }
+
+    /// <summary>
+    /// Açılışta emülatör exe'si ile BIOS/firmware klasörünü kullanıcının yerine arar.
+    /// Hiçbir şey indirmez: diskte zaten kurulu olanları bulup yolunu kaydeder.
+    /// </summary>
+    private async Task RunAutoSetupAsync()
+    {
+        try
+        {
+            var report = await _autoSetup.RunAsync().ConfigureAwait(false);
+
+            Logger.Info(nameof(MainViewModel),
+                "Otomatik kurulum: " + (report.Changed
+                    ? report.Summary.ReplaceLineEndings(" | ")
+                    : "yeni bir şey bulunamadı"));
+
+            if (report.Changed)
+            {
+                var text = report.Summary.ReplaceLineEndings(" · ");
+                await Dispatcher.InvokeAsync(() => StatusMessage = text).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(nameof(MainViewModel), "Otomatik kurulum başarısız.", ex);
         }
     }
 

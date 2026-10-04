@@ -188,6 +188,9 @@
                                 Command="{Binding OpenDataFolderCommand}" />
                     </StackPanel>
 
+                    <TextBlock Text="Sürüm" Style="{StaticResource TextCaption}" Margin="0,12,0,4" />
+                    <TextBlock Text="{Binding AppVersion}" Style="{StaticResource TextMuted}" />
+
                     <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource TextCaption}" Margin="0,12,0,0" />
                     <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource TextCaption}"
                                Foreground="{DynamicResource Brush.Danger}" />

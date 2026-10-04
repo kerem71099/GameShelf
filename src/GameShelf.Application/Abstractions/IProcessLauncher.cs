@@ -7,6 +7,14 @@ public interface ILaunchedProcess
 {
     int Id { get; }
 
+    /// <summary>
+    /// Emülatörün konsola (stdout/stderr) yazdığı satırlar: yalnızca tanılama içindir ve
+    /// sınırlı bir tampon tutar. Çoğu emülatör Windows'ta GUI uygulaması olduğu için
+    /// genelde boş kalır; hata verdiklerinde ise nedeni buraya yazarlar
+    /// (örn. PCSX2 "Unknown parameter").
+    /// </summary>
+    string StartupOutput { get; }
+
     Task<int> WaitForExitAsync(CancellationToken cancellationToken = default);
 }
 

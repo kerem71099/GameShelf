@@ -23,20 +23,29 @@ public sealed class EmulatorLaunchService : IEmulatorLaunchService
     private readonly IEmulatorBackendFactory _backends;
     private readonly IProcessLauncher _processLauncher;
     private readonly ILoggingService _logger;
+    private readonly IDialogService? _dialogs;
+    private readonly IDispatcher? _dispatcher;
 
     public EmulatorLaunchService(
         ILibraryRepository repository,
         ISettingsService settings,
         IEmulatorBackendFactory backends,
         IProcessLauncher processLauncher,
-        ILoggingService logger)
+        ILoggingService logger,
+        IDialogService? dialogs = null,
+        IDispatcher? dispatcher = null)
     {
         _repository = repository;
         _settings = settings;
         _backends = backends;
         _processLauncher = processLauncher;
         _logger = logger;
+        _dialogs = dialogs;
+        _dispatcher = dispatcher;
     }
+
+    /// <summary>Emülatörün "hemen kapandı mı?" diye izlendiği süre.</summary>
+    private static readonly TimeSpan StartupWatchWindow = TimeSpan.FromSeconds(20);
 
     public async Task<LaunchValidation> ValidateAsync(Game game, CancellationToken cancellationToken = default)
     {
@@ -116,6 +125,9 @@ public sealed class EmulatorLaunchService : IEmulatorLaunchService
 
             // Süre takibi arka planda: çıkışta PlayTimeMinutes güncellenir.
             _ = TrackAsync(process, entry, game.Id);
+
+            // Emülatör birkaç saniye içinde kapanırsa kendi hata mesajını yakala.
+            _ = WatchStartupAsync(process, startInfo);
 
             return LaunchOutcome.Ok(process.Id, startInfo.FileName, startInfo.Arguments,
                 validation.Issues.Where(i => i.Severity == LaunchIssueSeverity.Warning).ToArray());
@@ -258,6 +270,60 @@ public sealed class EmulatorLaunchService : IEmulatorLaunchService
         catch (Exception ex)
         {
             _logger.Error(Category, "Başarısız launch kaydı yazılamadı.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Emülatör başladıktan kısa süre sonra kapanırsa konsola yazdığı mesajı yakalar:
+    /// log'a yazar ve (bilgi amaçlı) gösterir. Böylece "aynı hata" yerine emülatörün
+    /// kendi mesajını görürüz. Emülatörün çalışmasını hiçbir şekilde değiştirmez.
+    /// </summary>
+    private async Task WatchStartupAsync(ILaunchedProcess process, ProcessStartInfo startInfo)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(StartupWatchWindow);
+            var exitCode = await process.WaitForExitAsync(cts.Token).ConfigureAwait(false);
+
+            var output = (process.StartupOutput ?? string.Empty).Trim();
+
+            if (exitCode == 0 && output.Length == 0)
+            {
+                return; // temiz kapandı: söylenecek bir şey yok
+            }
+
+            var head = output.Length > 1200 ? output[^1200..] : output;
+
+            _logger.Warning(Category,
+                $"Emülatör kısa sürede kapandı (kod {exitCode}): {startInfo.FileName}{Environment.NewLine}{head}");
+
+            if (exitCode == 0 || _dialogs is null)
+            {
+                return;
+            }
+
+            var message = output.Length == 0
+                ? $"Emülatör başladıktan kısa süre sonra kapandı (çıkış kodu {exitCode}).\n\n" +
+                  $"{startInfo.FileName} {startInfo.Arguments}"
+                : $"Emülatör kapandı (çıkış kodu {exitCode}). Emülatörün kendi mesajı:\n\n{head}";
+
+            if (_dispatcher is not null)
+            {
+                await _dispatcher.InvokeAsync(() => _dialogs.ShowMessage("Emülatör kapandı", message))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                _dialogs.ShowMessage("Emülatör kapandı", message);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // pencere boyunca ayakta kaldı: sorun yok, izlemeyi bırak
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(Category, "Başlatma izlemesi başarısız.", ex);
         }
     }
 

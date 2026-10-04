@@ -6,6 +6,7 @@ namespace GameShelf.Application.Models;
 /// BIOS/firmware yolu kontrol sonucu.
 /// GameShelf bu dosyaları SAĞLAMAZ; yalnızca kullanıcının verdiği yolun varlığını kontrol eder.
 /// </summary>
+/// <param name="TargetDirectory">BIOS'un konması gereken klasör (emülatörün kendi klasörü; boş olabilir).</param>
 public sealed record BiosStatus(
     PlatformId PlatformId,
     string PlatformName,
@@ -13,4 +14,5 @@ public sealed record BiosStatus(
     bool Configured,
     bool Exists,
     string? Path,
-    string Hint);
+    string Hint,
+    string? TargetDirectory = null);

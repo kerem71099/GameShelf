@@ -22,7 +22,12 @@ public sealed partial class BiosStatusRow : ObservableObject
 
     public string? Path { get; init; }
 
+    /// <summary>BIOS'un konması gereken klasör (emülatörün kendi klasörü).</summary>
+    public string? TargetDirectory { get; init; }
+
     public string Hint { get; init; } = string.Empty;
+
+    public bool HasTargetDirectory => !string.IsNullOrWhiteSpace(TargetDirectory);
 
     public string StatusText => !Configured ? "Yapılandırılmadı" : Exists ? "Bulundu" : "Yol geçersiz";
 
@@ -58,6 +63,7 @@ public sealed partial class ToolsViewModel : ViewModelBase
     private readonly ISettingsService _settings;
     private readonly IShellService _shell;
     private readonly IDialogService _dialogs;
+    private readonly EmulatorAutoSetupService _autoSetup;
 
     private CancellationTokenSource? _scanCts;
 
@@ -70,6 +76,7 @@ public sealed partial class ToolsViewModel : ViewModelBase
         ISettingsService settings,
         IShellService shell,
         IDialogService dialogs,
+        EmulatorAutoSetupService autoSetup,
         ILoggingService logger,
         IDispatcher dispatcher)
         : base(logger, dispatcher)
@@ -82,6 +89,7 @@ public sealed partial class ToolsViewModel : ViewModelBase
         _settings = settings;
         _shell = shell;
         _dialogs = dialogs;
+        _autoSetup = autoSetup;
     }
 
     public ObservableCollection<BiosStatusRow> BiosRows { get; } = new();
@@ -104,32 +112,33 @@ public sealed partial class ToolsViewModel : ViewModelBase
 
     [RelayCommand]
     private async Task RunBiosCheckAsync()
+        => await RunBusyAsync(LoadBiosRowsAsync, "BIOS yolları kontrol ediliyor...");
+
+    private async Task LoadBiosRowsAsync(CancellationToken ct)
     {
-        await RunBusyAsync(async ct =>
+        var statuses = await _biosCheck.CheckAsync(ct).ConfigureAwait(false);
+
+        await Dispatcher.InvokeAsync(() =>
         {
-            var statuses = await _biosCheck.CheckAsync(ct).ConfigureAwait(false);
+            BiosRows.Clear();
 
-            await Dispatcher.InvokeAsync(() =>
+            foreach (var status in statuses)
             {
-                BiosRows.Clear();
-
-                foreach (var status in statuses)
+                BiosRows.Add(new BiosStatusRow
                 {
-                    BiosRows.Add(new BiosStatusRow
-                    {
-                        PlatformId = status.PlatformId,
-                        PlatformName = status.PlatformName,
-                        Configured = status.Configured,
-                        Exists = status.Exists,
-                        Path = status.Path,
-                        Hint = status.Hint
-                    });
-                }
-            });
+                    PlatformId = status.PlatformId,
+                    PlatformName = status.PlatformName,
+                    Configured = status.Configured,
+                    Exists = status.Exists,
+                    Path = status.Path,
+                    TargetDirectory = status.TargetDirectory,
+                    Hint = status.Hint
+                });
+            }
+        });
 
-            Output = string.Join(Environment.NewLine, statuses.Select(s =>
-                $"{s.PlatformName}: {(s.Configured ? (s.Exists ? "bulundu" : "yol geçersiz") : "yapılandırılmadı")}"));
-        }, "BIOS yolları kontrol ediliyor...");
+        Output = string.Join(Environment.NewLine, statuses.Select(s =>
+            $"{s.PlatformName}: {(s.Configured ? (s.Exists ? "bulundu" : "yol geçersiz") : "yapılandırılmadı")}"));
     }
 
     [RelayCommand]
@@ -267,46 +276,94 @@ public sealed partial class ToolsViewModel : ViewModelBase
 
     public string GamesDirectory => EmulatorSetupService.GamesDirectory;
 
+    /// <summary>Son otomatik kurulumun özeti (bulunan emülatör/BIOS yolları).</summary>
+    [ObservableProperty] private string _setupStatus = string.Empty;
+
+    /// <summary>
+    /// Tek düğmeyle her şeyi kendimiz buluruz: emülatör exe'leri + BIOS/firmware klasörleri.
+    /// Hiçbir dosya indirilmez; diskte zaten kurulu olanların yolu kaydedilir.
+    /// </summary>
     [RelayCommand]
-    private async Task RefreshSetupAsync()
+    private async Task AutoSetupAsync()
     {
         await RunBusyAsync(async ct =>
         {
-            var configs = await _repository.GetEmulatorConfigsAsync(ct).ConfigureAwait(false);
-            var rows = new List<EmulatorSetupRow>();
+            var report = await _autoSetup.RunForcedAsync(ct).ConfigureAwait(false);
 
-            foreach (var info in _emulatorSetup.Downloads)
+            await LoadSetupRowsAsync(ct).ConfigureAwait(false);
+            await LoadBiosRowsAsync(ct).ConfigureAwait(false);
+
+            SetupStatus = report.Summary;
+            Output = report.Summary;
+        }, "Otomatik kurulum: emülatörler ve BIOS klasörleri aranıyor...");
+    }
+
+    [RelayCommand]
+    private async Task RefreshSetupAsync()
+        => await RunBusyAsync(LoadSetupRowsAsync, "Kurulum durumu okunuyor...");
+
+    private async Task LoadSetupRowsAsync(CancellationToken ct)
+    {
+        var configs = await _repository.GetEmulatorConfigsAsync(ct).ConfigureAwait(false);
+        var rows = new List<EmulatorSetupRow>();
+
+        foreach (var info in _emulatorSetup.Downloads)
+        {
+            if (!TryParsePlatform(info.PlatformKey, out var platform))
             {
-                if (!TryParsePlatform(info.PlatformKey, out var platform))
-                {
-                    continue;
-                }
-
-                var config = configs.FirstOrDefault(c => c.PlatformId == platform);
-                var configured = config is not null && !string.IsNullOrWhiteSpace(config.ExecutablePath);
-                var exists = configured && File.Exists(config!.ExecutablePath!);
-
-                rows.Add(new EmulatorSetupRow
-                {
-                    PlatformKey = info.PlatformKey,
-                    PlatformName = info.PlatformName,
-                    EmulatorName = info.EmulatorName,
-                    Hint = info.Hint,
-                    ExePath = config?.ExecutablePath ?? string.Empty,
-                    StatusText = !configured ? "Kurulu değil" : exists ? "Hazır" : "Yol geçersiz",
-                    StatusBrushKey = !configured ? "Brush.TextMuted" : exists ? "Brush.Success" : "Brush.Warning"
-                });
+                continue;
             }
 
-            await Dispatcher.InvokeAsync(() =>
+            var config = configs.FirstOrDefault(c => c.PlatformId == platform);
+            var configured = config is not null && !string.IsNullOrWhiteSpace(config.ExecutablePath);
+            var exists = configured && File.Exists(config!.ExecutablePath!);
+
+            rows.Add(new EmulatorSetupRow
             {
-                SetupRows.Clear();
-                foreach (var row in rows)
-                {
-                    SetupRows.Add(row);
-                }
+                PlatformKey = info.PlatformKey,
+                PlatformName = info.PlatformName,
+                EmulatorName = info.EmulatorName,
+                Hint = info.Hint,
+                ExePath = config?.ExecutablePath ?? string.Empty,
+                StatusText = !configured ? "Kurulu değil" : exists ? "Hazır" : "Yol geçersiz",
+                StatusBrushKey = !configured ? "Brush.TextMuted" : exists ? "Brush.Success" : "Brush.Warning"
             });
-        }, "Kurulum durumu okunuyor...");
+        }
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            SetupRows.Clear();
+
+            foreach (var row in rows)
+            {
+                SetupRows.Add(row);
+            }
+        });
+    }
+
+    /// <summary>
+    /// BIOS'un konması gereken klasörü açar (gerekirse oluşturur).
+    /// Kullanıcı kendi BIOS'unu sürükleyip bıraksın diye; içine hiçbir şey yazmayız.
+    /// </summary>
+    [RelayCommand]
+    private void OpenBiosFolder(string? directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(directory);
+            _shell.OpenFolder(directory);
+            Output = $"Klasör açıldı: {directory}";
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(nameof(ToolsViewModel), "BIOS klasörü açılamadı.", ex);
+            Output = $"Klasör açılamadı: {directory}";
+        }
     }
 
     /// <summary>Emülatörün resmî indirme sayfasını tarayıcıda açar (ikili dosya dağıtmayız).</summary>

@@ -28,6 +28,7 @@ public sealed class BiosCheckService
     public async Task<IReadOnlyList<BiosStatus>> CheckAsync(CancellationToken cancellationToken = default)
     {
         var platforms = await _repository.GetPlatformsAsync(cancellationToken).ConfigureAwait(false);
+        var configs = await _repository.GetEmulatorConfigsAsync(cancellationToken).ConfigureAwait(false);
         var rows = new List<BiosStatus>();
 
         foreach (var platform in platforms
@@ -38,6 +39,11 @@ public sealed class BiosCheckService
             var configured = !string.IsNullOrWhiteSpace(path);
             var exists = configured && (Directory.Exists(path!) || File.Exists(path!));
 
+            var exePath = configs.FirstOrDefault(c => c.PlatformId == platform.Id)?.ExecutablePath;
+            var targetDirectory = exists && !string.IsNullOrWhiteSpace(path)
+                ? path
+                : BiosLocator.RecommendedDirectory(platform.Id, exePath);
+
             rows.Add(new BiosStatus(
                 platform.Id,
                 platform.ShortName,
@@ -45,7 +51,8 @@ public sealed class BiosCheckService
                 configured,
                 exists,
                 configured ? path : null,
-                HintFor(platform.Id)));
+                HintFor(platform.Id),
+                targetDirectory));
         }
 
         return rows;

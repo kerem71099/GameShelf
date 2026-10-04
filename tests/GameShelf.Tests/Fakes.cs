@@ -111,6 +111,8 @@ public sealed class FakeLaunchedProcess : ILaunchedProcess
 {
     public int Id => 4242;
 
+    public string StartupOutput { get; set; } = string.Empty;
+
     public int ExitCode { get; init; }
 
     public bool WasAwaited { get; private set; }

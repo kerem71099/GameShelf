@@ -52,6 +52,34 @@ Bu yüzden:
 - Uygulama yalnızca **resmî indirme sayfasını açar** (`Araçlar → KURULUM → İndir`).
 - Aynı şekilde **BIOS/firmware/anahtar da dağıtılmaz**; kullanıcı kendi konsolundan sağlar.
 
+### Otomatik kurulum: emülatör + BIOS'u uygulama kendisi bulur
+
+Kullanıcı hiçbir yolu elle seçmesin diye GameShelf açılışta — ve her oyun
+başlatılmadan hemen önce — şunları **kendisi** arar:
+
+1. **Emülatör exe'si:** `%LOCALAPPDATA%\GameShelf\emulators\...`, EXE'nin yanındaki
+   `emulators\`, `Program Files` ve diğer bilinen konumlar.
+2. **BIOS/firmware klasörü:** emülatörün kendi `bios` klasörü (exe'nin yanı),
+   `Belgelerim\PCSX2\bios`, `Belgelerim\DuckStation\bios`, `%USERPROFILE%\RPCS3\dev_flash`
+   gibi konumlar. Dosya gerçekten oradaysa (PS2 için 4 MB `*.bin`, PS1 için 512 KB `*.bin`,
+   PS3 için `dev_flash` ağacı) yol otomatik kaydedilir.
+
+Bulunan her şey `Ayarlar → EMÜLATÖRLER / BIOS YOLLARI` ve `Araçlar → KURULUM / BIOS`
+ekranlarında görünür. **Araçlar → "⚡ Otomatik kurulum"** düğmesi aynı taramayı elle
+(kayıtlı yol bozuksa da) yeniden yapar.
+
+> **Yasal sınır:** GameShelf BIOS indirmez, kopyalamaz, üretmez. Yalnızca senin diskinde
+> zaten var olan dosyanın **yolunu** işaretler. BIOS'u kendi konsolundan dump etmelisin.
+
+- **BIOS'un yoksa:** `Araçlar → BIOS / FIRMWARE KONTROLÜ` satırındaki **"Klasörü aç"**
+  düğmesi emülatörün BIOS'u aradığı klasörü açar (gerekirse oluşturur). Kendi BIOS'unu
+  oraya sürükle, sonra **"⚡ Otomatik kurulum"** ile yenile.
+- **Emülatör hemen kapanırsa:** emülatörün konsola yazdığı mesaj artık log'a yazılır ve
+  ekranda gösterilir (`Unknown parameter: ...` gibi). Emülatör mesaj yazmazsa log'a bak:
+  `%LOCALAPPDATA%\GameShelf\logs\app-YYYY-AA-GG.log`.
+- **Hangi derlemeyi çalıştırdığın:** `Ayarlar → GELİŞMİŞ → Sürüm` satırında yazar
+  (`v0.1.0 · 04.10.2026 15:30` gibi). Destek isterken bu satırı ilet.
+
 ### Pratik çözüm: `emulators\` klasörü
 
 EXE'nin yanına bir `emulators\` klasörü koy ve emülatörleri oraya çıkar:

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GameShelf.Application.Abstractions;
+using GameShelf.Application.Services;
 using GameShelf.Domain.Entities;
 using GameShelf.Domain.Enums;
 using GameShelf.Domain.Extensions;
@@ -27,6 +28,7 @@ public sealed partial class GameDetailsViewModel : ViewModelBase
     private readonly ISettingsService _settings;
     private readonly IDialogService _dialogs;
     private readonly IShellService _shell;
+    private readonly EmulatorAutoSetupService _autoSetup;
 
     private Game _game = new();
 
@@ -37,6 +39,7 @@ public sealed partial class GameDetailsViewModel : ViewModelBase
         ISettingsService settings,
         IDialogService dialogs,
         IShellService shell,
+        EmulatorAutoSetupService autoSetup,
         ILoggingService logger,
         IDispatcher dispatcher)
         : base(logger, dispatcher)
@@ -47,6 +50,7 @@ public sealed partial class GameDetailsViewModel : ViewModelBase
         _settings = settings;
         _dialogs = dialogs;
         _shell = shell;
+        _autoSetup = autoSetup;
 
         Platforms =
         [
@@ -164,6 +168,9 @@ public sealed partial class GameDetailsViewModel : ViewModelBase
 
         await RunBusyAsync(async ct =>
         {
+            // Kullanıcı uğraşmasın: emülatör/BIOS yolu eksikse başlamadan önce kendimiz ararız.
+            await _autoSetup.EnsurePlatformAsync(_game.PlatformId, ct).ConfigureAwait(false);
+
             var validation = await _launchService.ValidateAsync(_game, ct).ConfigureAwait(false);
 
             if (validation.HasErrors)

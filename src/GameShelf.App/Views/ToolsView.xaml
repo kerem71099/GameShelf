@@ -26,7 +26,14 @@
             <TextBlock Grid.Row="0" Text="Araçlar" Style="{StaticResource TextDisplay}" />
 
             <!-- ============================================== eylemler -->
-            <WrapPanel Grid.Row="1" Margin="0,20,0,0">
+            <StackPanel Grid.Row="1" Margin="0,20,0,0">
+                <!-- otomatik kurulum: kullanıcı hiçbir yolu elle aramasın -->
+                <Button Content="⚡ Otomatik kurulum (emülatör + BIOS'u kendisi bulsun)" Style="{StaticResource ButtonPrimary}"
+                        Command="{Binding AutoSetupCommand}" HorizontalAlignment="Left" />
+                <TextBlock Text="{Binding SetupStatus}" Style="{StaticResource TextCaption}" TextWrapping="Wrap"
+                           Margin="0,8,0,0" />
+
+                <WrapPanel Margin="0,16,0,0">
                 <Button Content="BIOS / firmware kontrolü" Style="{StaticResource ButtonSecondary}"
                         Command="{Binding RunBiosCheckCommand}" />
                 <Button Content="Kayıp dosyaları bul" Margin="8,0,0,0" Style="{StaticResource ButtonSecondary}"
@@ -39,7 +46,8 @@
                         Command="{Binding OpenLogsCommand}" />
                 <Button Content="Veri klasörünü aç" Margin="8,0,0,0" Style="{StaticResource ButtonGhost}"
                         Command="{Binding OpenDataFolderCommand}" />
-            </WrapPanel>
+                </WrapPanel>
+            </StackPanel>
 
             <ProgressBar Grid.Row="2" Margin="0,16,0,0" Style="{StaticResource ProgressBarBase}"
                          Value="{Binding Progress}" Maximum="1"
@@ -60,12 +68,20 @@
                                         <ColumnDefinition Width="60" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding PlatformName}" Style="{StaticResource TextBodyStrong}" />
                                     <TextBlock Grid.Column="1" Text="{Binding Path}" Style="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding StatusText}"
                                                Style="{StaticResource TextCaption}" VerticalAlignment="Center" />
+                                    <!-- BIOS'u buraya koyması gereken klasörü tek tıkla aç -->
+                                    <Button Grid.Column="3" Content="Klasörü aç" Margin="8,0,0,0"
+                                            Style="{StaticResource ButtonGhost}"
+                                            ToolTip="{Binding TargetDirectory}"
+                                            Visibility="{Binding HasTargetDirectory, Converter={StaticResource BoolToVisibility}}"
+                                            Command="{Binding DataContext.OpenBiosFolderCommand, ElementName=ToolsRoot}"
+                                            CommandParameter="{Binding TargetDirectory}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

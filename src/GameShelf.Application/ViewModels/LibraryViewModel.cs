@@ -32,6 +32,7 @@ public sealed partial class LibraryViewModel : ViewModelBase
     private readonly LibraryMaintenanceService _maintenance;
     private readonly IDialogService _dialogs;
     private readonly IShellService _shell;
+    private readonly EmulatorAutoSetupService _autoSetup;
 
     private CancellationTokenSource? _searchCts;
     private CancellationTokenSource? _scanCts;
@@ -43,6 +44,7 @@ public sealed partial class LibraryViewModel : ViewModelBase
         LibraryMaintenanceService maintenance,
         IDialogService dialogs,
         IShellService shell,
+        EmulatorAutoSetupService autoSetup,
         ILoggingService logger,
         IDispatcher dispatcher)
         : base(logger, dispatcher)
@@ -53,6 +55,7 @@ public sealed partial class LibraryViewModel : ViewModelBase
         _maintenance = maintenance;
         _dialogs = dialogs;
         _shell = shell;
+        _autoSetup = autoSetup;
 
         ViewMode = settings.Current.LibraryViewMode;
         SortBy = settings.Current.SortBy;
@@ -208,6 +211,9 @@ public sealed partial class LibraryViewModel : ViewModelBase
 
         await RunBusyAsync(async ct =>
         {
+            // Kullanıcı uğraşmasın: emülatör/BIOS yolu eksikse başlamadan önce kendimiz ararız.
+            await _autoSetup.EnsurePlatformAsync(target.Model.PlatformId, ct).ConfigureAwait(false);
+
             var validation = await _launchService.ValidateAsync(target.Model, ct).ConfigureAwait(false);
 
             if (validation.HasErrors)

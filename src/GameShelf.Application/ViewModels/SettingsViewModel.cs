@@ -97,6 +97,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     public string LegalNote => BiosCheckService.Notice;
 
+    /// <summary>Hangi derlemenin çalıştığı (destek sırasında sürüm karışmasın).</summary>
+    public string AppVersion => BuildStamp.Display;
+
     [ObservableProperty] private LibraryFolder? _selectedFolder;
     [ObservableProperty] private string _theme = "Dark";
     [ObservableProperty] private bool _confirmBeforeLaunch = true;
